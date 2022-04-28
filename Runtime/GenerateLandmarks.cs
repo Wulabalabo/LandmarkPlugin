@@ -39,7 +39,6 @@ namespace Landmark
             foreach (var landmark in Landmarks)
             {
                 GameObject.DestroyImmediate(landmark);
-                GC.Collect();
             }
 
             Landmarks.Clear();
