@@ -11,7 +11,7 @@ namespace Landmark
     {
         public GameObject Character, Point;
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
-        public List<GameObject> Landmarks=new List<GameObject>();
+        public List<GameObject> Landmarks = new List<GameObject>();
 
         public void InitModelBoneData()
         {
@@ -24,12 +24,12 @@ namespace Landmark
             var info = Utils.GetJPropertyByFile(Character.name, "definition");
             foreach (var jToken in info)
             {
-                var jProperty = (JProperty) jToken;
+                var jProperty = (JProperty)jToken;
                 foreach (int token in jProperty.Value)
                 {
-                   var landmark= Instantiate(Point, ModelBoneDataDictionary[jProperty.Name].transform);
-                   landmark.name = $"Landmark{token}";
-                   Landmarks.Add(landmark);
+                    var landmark = Instantiate(Point, ModelBoneDataDictionary[jProperty.Name].transform);
+                    landmark.name = $"Landmark{token}";
+                    Landmarks.Add(landmark);
                 }
             }
         }
