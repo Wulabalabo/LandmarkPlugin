@@ -1,7 +1,7 @@
 {
   "name": "com.viewpointet.landmark",
   "displayName": "VP-Landmark",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "unity": "2021.2",
   "license": "Apache-2.0",
   "dependencies": {
