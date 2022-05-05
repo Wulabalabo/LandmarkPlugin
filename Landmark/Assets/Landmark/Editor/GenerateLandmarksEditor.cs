@@ -21,6 +21,16 @@ public class GenerateLandmarksEditor : Editor
             script.GenerateLandmarksForCharacter();
         }
 
+        if (GUILayout.Button("Export Annotation"))
+        {
+            script.SaveLandmarksPosition();
+        }
+
+        if (GUILayout.Button("Import Annotation"))
+        {
+            script.ImportLandmarksPosition();
+        }
+
         if (GUILayout.Button("Clear Landmarks"))
         {
             script.ClearLandmarks();
