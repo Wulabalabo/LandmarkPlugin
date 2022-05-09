@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,6 @@ namespace Landmark
 {
     public static class Utils
     {
-
         public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject currentTf)
         {
             var modelBoneData = new SerializableDictionary<string, GameObject>();
@@ -50,6 +50,12 @@ namespace Landmark
             }
 
             throw new FileNotFoundException();
+        }
+
+        public static void SaveTexture2DLocally(Texture2D texture2D, string textName,string path)
+        {
+            byte[] bytes = texture2D.EncodeToPNG();
+            File.WriteAllBytes(path+"/"+textName+".png",bytes);
         }
     }
 

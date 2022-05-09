@@ -10,8 +10,6 @@ namespace Landmark
     [CustomEditor(typeof(GenerateLandmarks))]
     public class GenerateLandmarksEditor : Editor
     {
-        
-        public static List<AnimationClip> _animationClips = new List<AnimationClip>();
         private GenerateLandmarks _script;
         private int _currentClipIndex = 0;
         private void SubTitle(string title)
@@ -75,33 +73,20 @@ namespace Landmark
 
             if (GUILayout.Button("Import Animation") && _script.Character != null)
             {
-                _animationClips.Clear();
-                var path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_script.Character);
-
-                var assetRepresentationsAtPath = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
-
-                foreach (var assetRepresentation in assetRepresentationsAtPath)
-                {
-                    var animationClip = assetRepresentation as AnimationClip;
-
-                    if (animationClip != null)
-                    {
-                        _animationClips.Add(animationClip);
-                    }
-                }
+                _script.ImportCharacterAnimations();
             }
 
             EditorGUILayout.BeginHorizontal();
 
-            _currentClipIndex = EditorGUILayout.Popup(_currentClipIndex, _animationClips.Select((item) => item.name).ToArray());
-            if (_animationClips.Count > 0 && _script.Character != null)
+            _currentClipIndex = EditorGUILayout.Popup(_currentClipIndex, _script.AnimationClips.Select((item) => item.name).ToArray());
+            if (_script.AnimationClips.Count> 0 && _script.Character != null)
             {
-                _animationClips[_currentClipIndex].SampleAnimation(_script.Character, 0);
+                _script.AnimationClips[_currentClipIndex].SampleAnimation(_script.Character, 0);
             }
 
             if (GUILayout.Button("Set Default Pose"))
             {
-                _animationClips.Clear();
+                _script.AnimationClips.Clear();
             }
 
             EditorGUILayout.EndHorizontal();

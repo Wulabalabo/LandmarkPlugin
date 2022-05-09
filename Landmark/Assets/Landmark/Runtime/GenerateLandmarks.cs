@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Plastic.Newtonsoft.Json.Linq;
+using UnityEditor;
 using UnityEngine;
 
 
@@ -13,6 +14,7 @@ namespace Landmark
         public GameObject Character, Point;
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
         public List<LandmarkPoint> Landmarks=new List<LandmarkPoint>();
+        public List<AnimationClip> AnimationClips=new List<AnimationClip>();
 
         public void InitModelBoneData()
         {
@@ -67,6 +69,28 @@ namespace Landmark
             }
 
             throw new UnityException();
+        }
+
+        public void ImportCharacterAnimations()
+        {
+            if (Character == null)
+            {
+                throw new NullReferenceException();
+            }
+            AnimationClips.Clear();
+            var path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(Character);
+
+            var assetRepresentationsAtPath = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
+
+            foreach (var assetRepresentation in assetRepresentationsAtPath)
+            {
+                var animationClip = assetRepresentation as AnimationClip;
+
+                if (animationClip != null)
+                {
+                    AnimationClips.Add(animationClip);
+                }
+            }
         }
 
         public void ClearLandmarks()
