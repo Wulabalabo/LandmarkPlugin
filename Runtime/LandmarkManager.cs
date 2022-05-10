@@ -13,7 +13,7 @@ namespace Landmark
     {
         public GameObject Character, Point;
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
-        public List<LandmarkPoint> Landmarks=new List<LandmarkPoint>();
+        public List<GameObject> Landmarks=new List<GameObject>();
         public List<AnimationClip> AnimationClips=new List<AnimationClip>();
 
         public void InitModelBoneData()
@@ -32,7 +32,7 @@ namespace Landmark
                 {
                     var landmark = Instantiate(Point, ModelBoneDataDictionary[jProperty.Name].transform);
                     landmark.name = $"Landmark{token}";
-                    Landmarks.Add(new LandmarkPoint(landmark,landmark.transform.position));
+                    Landmarks.Add(landmark);
                 }
             }
         }
@@ -42,9 +42,9 @@ namespace Landmark
             var annotations=new JArray();
             foreach (var landmarkPoint in Landmarks)
             {
-                annotations.Add(new JArray(landmarkPoint.Pos.x, landmarkPoint.Pos.y, landmarkPoint.Pos.z));
+                annotations.Add(new JArray(landmarkPoint.transform.localPosition.x, landmarkPoint.transform.localPosition.y, landmarkPoint.transform.localPosition.z));
             }
-            Utils.ModifyConfigFile(Character.name, "annotation",annotations);
+            Utils.ModifyConfigFile(Character.name, "annotation", annotations);
         }
 
         public void ImportLandmarksPosition()
@@ -62,8 +62,7 @@ namespace Landmark
                         z = (float)info[i][2],
 
                     };
-                    Landmarks[i].Object.transform.localPosition = pos;
-                    Landmarks[i].Pos = pos;
+                    Landmarks[i].transform.localPosition = pos;
                 }
                 return;
             }
@@ -97,7 +96,7 @@ namespace Landmark
         {
             foreach (var landmark in Landmarks)
             {
-                GameObject.DestroyImmediate(landmark.Object);
+                GameObject.DestroyImmediate(landmark);
             }
 
             Landmarks.Clear();
