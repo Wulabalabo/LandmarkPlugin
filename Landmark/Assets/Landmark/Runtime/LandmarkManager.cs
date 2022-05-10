@@ -35,6 +35,7 @@ namespace Landmark
                     Landmarks.Add(landmark);
                 }
             }
+            Landmarks= Landmarks.OrderBy((item)=>int.Parse(item.gameObject.name.Remove(0, 8)) ).ToList();
         }
 
         public void SaveLandmarksPosition()
