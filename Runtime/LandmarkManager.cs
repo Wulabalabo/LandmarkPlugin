@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Landmark
 {
-    public class GenerateLandmarks : MonoBehaviour
+    public class LandmarkManager : MonoBehaviour
     {
         public GameObject Character, Point;
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;

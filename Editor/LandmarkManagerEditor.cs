@@ -7,10 +7,10 @@ using UnityEngine.UIElements;
 
 namespace Landmark
 {
-    [CustomEditor(typeof(GenerateLandmarks))]
-    public class GenerateLandmarksEditor : Editor
+    [CustomEditor(typeof(LandmarkManager))]
+    public class LandmarkManagerEditor : Editor
     {
-        private GenerateLandmarks _script;
+        private LandmarkManager _script;
         private int _currentClipIndex = 0;
         private void SubTitle(string title)
         {
@@ -22,7 +22,7 @@ namespace Landmark
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            _script = (GenerateLandmarks)target;
+            _script = (LandmarkManager)target;
 
             #region Generate Landmarks
             SubTitle("Generate Landmarks");
