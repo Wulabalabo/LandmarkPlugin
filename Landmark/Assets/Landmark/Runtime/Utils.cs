@@ -38,7 +38,6 @@ namespace Landmark
         public static void ModifyConfigFile(string fileName, string type, JToken obj)
         {
             var path = GlobalConfig.LandmarkConfigPath + "/" + fileName + "_landmarks.json";
-            Debug.Log(path);
             if (File.Exists(path))
             {
                 StreamReader sr = new StreamReader(path);
