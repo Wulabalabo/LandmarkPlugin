@@ -12,6 +12,7 @@ namespace Landmark
     public class LandmarkManager : MonoBehaviour
     {
         public GameObject Character, Point;
+        public float PointScale;
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
         public List<GameObject> Landmarks=new List<GameObject>();
         public List<AnimationClip> AnimationClips=new List<AnimationClip>();
@@ -24,6 +25,7 @@ namespace Landmark
         public void GenerateLandmarksForCharacter()
         {
             ClearLandmarks();
+            Point.transform.localScale = new Vector3(PointScale, PointScale, PointScale);
             var info = Utils.GetJPropertyByFile(Character.name, "definition");
             foreach (var jToken in info)
             {
@@ -79,7 +81,11 @@ namespace Landmark
             }
             AnimationClips.Clear();
             var path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(Character);
-
+            if (path.Contains(".prefab"))
+            {
+               var tempObject= Character.GetComponentInChildren<SkinnedMeshRenderer>();              
+               path = AssetDatabase.GetAssetPath(tempObject.sharedMesh);             
+            }
             var assetRepresentationsAtPath = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
 
             foreach (var assetRepresentation in assetRepresentationsAtPath)
