@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Unity.Plastic.Newtonsoft.Json;
 using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -10,10 +11,10 @@ namespace Landmark
 {
     public static class Utils
     {
-        public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject currentTf)
+        public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject current)
         {
             var modelBoneData = new SerializableDictionary<string, GameObject>();
-            foreach (var componentsInChild in currentTf.GetComponentsInChildren<Transform>())
+            foreach (var componentsInChild in current.GetComponentsInChildren<Transform>())
             {
                 modelBoneData.Add(componentsInChild.gameObject.name, componentsInChild.gameObject);
             }
@@ -31,8 +32,36 @@ namespace Landmark
                 sr.Close();
                 return data[type];
             }
+            else
+            {
+                if(!Directory.Exists(GlobalConfig.LandmarkConfigPath))
+                {
+                    Directory.CreateDirectory(GlobalConfig.LandmarkConfigPath);
+                }
+                Debug.LogWarning("Using DefaultLandmarkConfig");
+                var defaultPath = UnityEditor.AssetDatabase.GUIDToAssetPath(UnityEditor.AssetDatabase.FindAssets("DefaultLandmark")[0]);
+                StreamReader sr = new StreamReader(defaultPath);
+                var str = sr.ReadToEnd();
+                using (FileStream stream = new FileStream(path,FileMode.OpenOrCreate))
+                {
+                    stream.Write(Encoding.UTF8.GetBytes(str));
+                    stream.Close();
+                }
+                var data = JObject.Parse(str);
+                sr.Close();
+                return data[type];
+            }
 
             throw new FileNotFoundException();
+        }
+
+        private static void ModifySpecifyConfigType(string path,string type,JToken obj)
+        {
+            StreamReader sr = new StreamReader(path);
+            var data = JObject.Parse(sr.ReadToEnd());
+            data[type] = obj;
+            sr.Close();
+            File.WriteAllText(path, data.ToString());
         }
 
         public static void ModifyConfigFile(string fileName, string type, JToken obj)
@@ -40,14 +69,9 @@ namespace Landmark
             var path = GlobalConfig.LandmarkConfigPath + "/" + fileName + "_landmarks.json";
             if (File.Exists(path))
             {
-                StreamReader sr = new StreamReader(path);
-                var data = JObject.Parse(sr.ReadToEnd());
-                data[type] = obj;
-                sr.Close();
-                File.WriteAllText(path, data.ToString());
+                ModifySpecifyConfigType(path, type, obj); 
                 return;
             }
-
             throw new FileNotFoundException();
         }
 

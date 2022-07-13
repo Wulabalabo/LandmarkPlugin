@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Landmark
 {
     public class LandmarkManager : MonoBehaviour
-    {
+    {        
         public GameObject Character, Point;
         public float PointScale;
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
