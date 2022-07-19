@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Unity.Plastic.Newtonsoft.Json;
 using Unity.Plastic.Newtonsoft.Json.Linq;
@@ -14,6 +15,14 @@ namespace Landmark
         public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject current)
         {
             var modelBoneData = new SerializableDictionary<string, GameObject>();
+            //var repeat = current.GetComponentsInChildren<Transform>().GroupBy(x=>x.name)
+            //    .Where(g => g.Count() > 1)
+            //    .Select(y => y.Key)
+            //    .ToList();
+            //foreach (var group in repeat)
+            //{
+            //    Debug.Log(group);
+            //}
             foreach (var componentsInChild in current.GetComponentsInChildren<Transform>())
             {
                 modelBoneData.Add(componentsInChild.gameObject.name, componentsInChild.gameObject);
@@ -62,6 +71,14 @@ namespace Landmark
             data[type] = obj;
             sr.Close();
             File.WriteAllText(path, data.ToString());
+        }
+
+        public static void CreateDirctory(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }            
         }
 
         public static void ModifyConfigFile(string fileName, string type, JToken obj)
