@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7a72f184bda15494899eb10d3aee3ff7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_ViewDataDictionary: {instanceID: 0}
+  - Script: {fileID: 3527836426213716626, guid: bc1a00d2ef78dc44b86a1bcace16c30a, type: 3}
+  - Point: {fileID: 4820453106132402718, guid: 9c7ded535792d714ca194513274bc95a, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -44,9 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcdfb562173192b4eac2efda56ed91ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Character: {fileID: 0}
-  Point: {fileID: 4820453106132402718, guid: 9c7ded535792d714ca194513274bc95a, type: 3}
   ModelBoneDataDictionary:
     list: []
-  Landmarks: []
   AnimationClips: []
+  Landmarks: []
