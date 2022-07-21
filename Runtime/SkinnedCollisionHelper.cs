@@ -16,7 +16,7 @@ namespace Landmark
                                     //private Mesh mesh; // the dynamically-updated collision mesh
         public Mesh Mesh { get; private set; }
         private MeshCollider _collide;
-
+        private MeshFilter _filter;
         private SkinnedMeshRenderer _rend;
 
         private GameObject _updateGameObject;
@@ -26,12 +26,15 @@ namespace Landmark
         // data that we can internally use to quickly update the collision mesh.
         public void Init(GameObject obj)
         {
+            
             _updateGameObject = obj;
             _rend = obj.GetComponent(typeof(SkinnedMeshRenderer)) as SkinnedMeshRenderer;
             _collide = obj.GetComponent(typeof(MeshCollider)) as MeshCollider;
+            _filter=obj.GetComponent<MeshFilter>();
             if (_collide != null && _rend != null)
             {
                 Mesh baseMesh = _rend.sharedMesh;
+               
                 Mesh = new Mesh
                 {
                     vertices = baseMesh.vertices,
@@ -88,10 +91,12 @@ namespace Landmark
             }
         }
 
+        
+
         // Function:    UpdateCollisionMesh
         //  Manually recalculates the collision mesh of the skinned mesh on this
         // object.
-        public void UpdateCollisionMesh()
+        public  void UpdateCollisionMesh()
         {
             if (Mesh == null) return;
             // Start by initializing all vertices to 'empty'
@@ -105,9 +110,11 @@ namespace Landmark
             {
                 foreach (CVertexWeight vw in wList.Weights)
                 {
+
                     _newVert[vw.Index] += wList.Transform.localToWorldMatrix.MultiplyPoint3x4(vw.LocalPosition) * vw.Weight;
                 }
             }
+
 
             // Now convert each point into local coordinates of this object.
             for (int i = 0; i < _newVert.Length; i++)
@@ -118,6 +125,7 @@ namespace Landmark
             // Update the mesh (& collider) with the updated vertices
             Mesh.vertices = _newVert;
             Mesh.RecalculateBounds();
+            _filter.sharedMesh = Mesh;
             _collide.sharedMesh = Mesh;
         }
     }

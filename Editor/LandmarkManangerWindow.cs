@@ -8,8 +8,10 @@ using System.Linq;
 public class LandmarkManangerWindow : EditorWindow
 {
     private GameObject _character;
-    public LandmarkManager Script;
     public GameObject Point;
+    public LandmarkManager Script;
+
+    private SkinnedCollisionHelper _collisionHelper;
     private int _currentClipIndex = 0;
     private string _boneCount="";
     private float _scale = 0;
@@ -20,8 +22,7 @@ public class LandmarkManangerWindow : EditorWindow
 
     private void OnEnable()
     {
-       
-       
+        _collisionHelper = new SkinnedCollisionHelper();
     }
 
     private void SubTitle(string title)
@@ -40,15 +41,22 @@ public class LandmarkManangerWindow : EditorWindow
    
     private void OnGUI()
     {
-        
+        EditorGUI.BeginChangeCheck();
         _character = EditorGUILayout.ObjectField("Character:", _character, typeof(GameObject), true) as GameObject;
-        _scale = EditorGUILayout.FloatField("PointScale", _scale);
-        
-
-        if (_character == null)
+        if (EditorGUI.EndChangeCheck())
         {
             Script.AnimationClips.Clear();
             _boneCount = "0";
+            if (_character != null)
+            {
+                _collisionHelper.Init(_character.transform.Find("CC_Game_Body").gameObject);
+            }
+        }
+
+        _scale = EditorGUILayout.FloatField("PointScale", _scale);
+
+        if (_character == null)
+        {
             return;
         }
         EditorGUI.BeginDisabledGroup(true);
@@ -110,10 +118,12 @@ public class LandmarkManangerWindow : EditorWindow
 
         EditorGUILayout.BeginHorizontal();
 
+        EditorGUI.BeginChangeCheck();
         _currentClipIndex = EditorGUILayout.Popup(_currentClipIndex, Script.AnimationClips.Select((item) => item.name).ToArray());
-        if (Script.AnimationClips.Count > 0 && _character != null)
+        if (EditorGUI.EndChangeCheck()&& Script.AnimationClips.Count > 0 && _character != null)
         {
             Script.AnimationClips[_currentClipIndex].SampleAnimation(_character, 0);
+            _collisionHelper.UpdateCollisionMesh();
         }
 
         if (GUILayout.Button("Set Default Pose"))

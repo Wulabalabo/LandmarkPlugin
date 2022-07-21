@@ -17,7 +17,7 @@ namespace Landmark
         public List<GameObject> Landmarks = new List<GameObject>();
 
         public void InitModelBoneData(GameObject obj)
-        {
+        {           
             ModelBoneDataDictionary.Clear();
             ModelBoneDataDictionary = obj.transform.Find("root").gameObject.CollectModelBoneData();
         }
