@@ -127,6 +127,113 @@ namespace Landmark
             Landmarks.Clear();
         }
 
+        public void FindSkinLandmarks(GameObject obj, string field)
+        {
+            SortedList<int, (int, Vector3)> id2pos = new SortedList<int, (int, Vector3)>();
+
+            var info = Utils.GetJPropertyByFile(obj.name, field);
+            foreach (JProperty lm in info)
+            {
+                int jointId = int.Parse(lm.Name);
+                Transform jointLandmark = Landmarks[jointId].transform;
+                Transform bodyPart = jointLandmark.parent;
+
+                float distance = 0.5f;
+                Vector3 dir = Vector3.zero;
+                foreach (JProperty x in lm.Value)
+                {
+                    int skinId = int.Parse(x.Value.ToString());
+                    Transform landmark = Landmarks[skinId].transform;
+                    switch (x.Name)
+                    {
+                        case "+x":
+                            dir = bodyPart.right * distance;
+                            break;
+                        case "-x":
+                            dir = -bodyPart.right * distance;
+                            break;
+                        case "+y":
+                            dir = bodyPart.up * distance;
+                            break;
+                        case "-y":
+                            dir = -bodyPart.up * distance;
+                            break;
+                        case "+z":
+                            dir = bodyPart.forward * distance;
+                            break;
+                        case "-z":
+                            dir = -bodyPart.forward * distance;
+                            break;
+                    }
+                    RaycastHit hit;
+                    int layerMask = 0;
+                    layerMask |= (1 << LayerMask.NameToLayer("Character"));
+
+                    Vector3 start = landmark.position + dir;
+                    landmark.position = start;
+
+                    if (Physics.Raycast(start, -dir, out hit, 10, layerMask))
+                    {
+                        if (hit.collider.name == "CC_Game_Body")
+                        {
+                            landmark.parent = bodyPart;
+                            landmark.position = hit.point;
+                            id2pos.Add(skinId, (hit.triangleIndex, hit.barycentricCoordinate));
+                        }
+                    }
+                }
+            }
+            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, "baryCoordinates");
+            if (bary == null)
+            {
+                bary = new JObject();
+            }
+            else
+            {
+                foreach (JProperty x in (JToken)bary)
+                {
+                    int landmarkId = int.Parse(x.Name);
+                    if (id2pos.ContainsKey(landmarkId))
+                        continue;
+                    JObject record = JObject.Parse(x.Value.ToString());
+                    JArray coord = JArray.Parse(record["coordinate"].ToString());
+                    Vector3 v = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
+                    id2pos.Add(landmarkId, (int.Parse(record["triangleId"].ToString()), v));
+                }
+            }
+            bary.RemoveAll();
+            foreach (KeyValuePair<int, (int, Vector3)> kvp in id2pos)
+            {
+                JArray coord = new JArray();
+                coord.Add(kvp.Value.Item2.x);
+                coord.Add(kvp.Value.Item2.y);
+                coord.Add(kvp.Value.Item2.z);
+
+                JObject record = new JObject();
+                record["triangleId"] = kvp.Value.Item1;
+                record["coordinate"] = coord;
+
+                bary[kvp.Key.ToString()] = record;
+            }
+            Utils.ModifyConfigFile(obj.name, "baryCoordinates", bary);
+        }
+
+        public void ResetSkinLandmarks(GameObject obj, string field)
+        {
+            var info = Utils.GetJPropertyByFile(obj.name, field);
+            foreach (JProperty lm in info)
+            {
+                int jointId = int.Parse(lm.Name);
+                Transform jointLandmark = Landmarks[jointId].transform;
+                Transform bodyPart = jointLandmark.parent;
+
+                foreach (JProperty x in lm.Value)
+                {
+                    int skinId = int.Parse(x.Value.ToString());
+                    Landmarks[skinId].transform.localPosition = Vector3.zero;
+                }
+            }
+        }
     }
 }
 
