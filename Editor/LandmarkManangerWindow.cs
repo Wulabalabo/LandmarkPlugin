@@ -18,6 +18,32 @@ public class LandmarkManangerWindow : EditorWindow
     LandmarkManangerWindow()
     {
         this.titleContent = new GUIContent("LandmarkEditor");
+        SceneView.duringSceneGui -= OnSceneGUI;
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+
+    // Manual Annotation
+    void OnSceneGUI(SceneView iSceneView)
+    {
+        Event ev = Event.current;
+        if (ev.type == EventType.MouseDown)
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            RaycastHit hit;
+            int layerMask = 0;
+            layerMask |= (1 << LayerMask.NameToLayer("Character"));
+
+            if (Physics.Raycast(ray, out hit, 10, layerMask))
+            {
+                Transform selected = Selection.activeTransform;
+                if (selected != null && selected.tag.CompareTo("Landmark") == 0)
+                {
+                    selected.transform.position = hit.point;
+                    int landmarkId = int.Parse(selected.name.Remove(0, 8));
+                    Script.Insert2Barycentric(_character, landmarkId, hit.triangleIndex, hit.barycentricCoordinate);
+                }
+            }
+        }
     }
 
     private void OnEnable()
