@@ -127,10 +127,9 @@ namespace Landmark
             Landmarks.Clear();
         }
 
-        public void FindSkinLandmarks(GameObject obj, string field)
-        {
-            SortedList<int, (int, Vector3)> id2pos = new SortedList<int, (int, Vector3)>();
 
+        public void GenerateSkinLandmarks(GameObject obj, string field)
+        {
             var info = Utils.GetJPropertyByFile(obj.name, field);
             foreach (JProperty lm in info)
             {
@@ -178,12 +177,23 @@ namespace Landmark
                         {
                             landmark.parent = bodyPart;
                             landmark.position = hit.point;
-                            id2pos.Add(skinId, (hit.triangleIndex, hit.barycentricCoordinate));
+                            Insert2Barycentric(obj, skinId, hit.triangleIndex, hit.barycentricCoordinate);
                         }
                     }
                 }
             }
-            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, "baryCoordinates");
+        }
+
+
+        public void Insert2Barycentric(GameObject obj, int landmarkId, int triangleIndex, Vector3 barycentricCoordinate)
+        {
+            SortedList<int, (int, Vector3)> id2pos = new SortedList<int, (int, Vector3)>();
+            id2pos.Add(landmarkId, (triangleIndex, barycentricCoordinate));
+
+            string fieldname = "barycentricCoordinates";
+            string coordname = "coordinate";
+            string triangleIdname = "triangleId";
+            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, fieldname);
             if (bary == null)
             {
                 bary = new JObject();
@@ -192,15 +202,16 @@ namespace Landmark
             {
                 foreach (JProperty x in (JToken)bary)
                 {
-                    int landmarkId = int.Parse(x.Name);
+                    landmarkId = int.Parse(x.Name);
                     if (id2pos.ContainsKey(landmarkId))
                         continue;
                     JObject record = JObject.Parse(x.Value.ToString());
-                    JArray coord = JArray.Parse(record["coordinate"].ToString());
+                    JArray coord = JArray.Parse(record[coordname].ToString());
                     Vector3 v = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
-                    id2pos.Add(landmarkId, (int.Parse(record["triangleId"].ToString()), v));
+                    id2pos.Add(landmarkId, (int.Parse(record[triangleIdname].ToString()), v));
                 }
             }
+
             bary.RemoveAll();
             foreach (KeyValuePair<int, (int, Vector3)> kvp in id2pos)
             {
@@ -210,13 +221,14 @@ namespace Landmark
                 coord.Add(kvp.Value.Item2.z);
 
                 JObject record = new JObject();
-                record["triangleId"] = kvp.Value.Item1;
-                record["coordinate"] = coord;
+                record[triangleIdname] = kvp.Value.Item1;
+                record[coordname] = coord;
 
                 bary[kvp.Key.ToString()] = record;
             }
-            Utils.ModifyConfigFile(obj.name, "baryCoordinates", bary);
+            Utils.ModifyConfigFile(obj.name, fieldname, bary);
         }
+
 
         public void ResetSkinLandmarks(GameObject obj, string field)
         {
