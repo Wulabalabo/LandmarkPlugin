@@ -187,33 +187,23 @@ namespace Landmark
 
         public void Insert2Barycentric(GameObject obj, int landmarkId, int triangleIndex, Vector3 barycentricCoordinate)
         {
-            SortedList<int, (int, Vector3)> id2pos = new SortedList<int, (int, Vector3)>();
-            id2pos.Add(landmarkId, (triangleIndex, barycentricCoordinate));
-
             string fieldname = "barycentricCoordinates";
             string coordname = "coordinate";
             string triangleIdname = "triangleId";
-            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, fieldname);
-            if (bary == null)
+
+            SortedList<int, (int, Vector3)> id2bary = ReadBarycentric(obj);
+
+            if (id2bary.ContainsKey(landmarkId))
             {
-                bary = new JObject();
+                id2bary[landmarkId] = (triangleIndex, barycentricCoordinate);
             }
             else
             {
-                foreach (JProperty x in (JToken)bary)
-                {
-                    landmarkId = int.Parse(x.Name);
-                    if (id2pos.ContainsKey(landmarkId))
-                        continue;
-                    JObject record = JObject.Parse(x.Value.ToString());
-                    JArray coord = JArray.Parse(record[coordname].ToString());
-                    Vector3 v = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
-                    id2pos.Add(landmarkId, (int.Parse(record[triangleIdname].ToString()), v));
-                }
+                id2bary.Add(landmarkId, (triangleIndex, barycentricCoordinate));
             }
 
-            bary.RemoveAll();
-            foreach (KeyValuePair<int, (int, Vector3)> kvp in id2pos)
+            JObject bary = new JObject();
+            foreach (KeyValuePair<int, (int, Vector3)> kvp in id2bary)
             {
                 JArray coord = new JArray();
                 coord.Add(kvp.Value.Item2.x);
@@ -227,6 +217,31 @@ namespace Landmark
                 bary[kvp.Key.ToString()] = record;
             }
             Utils.ModifyConfigFile(obj.name, fieldname, bary);
+        }
+
+
+        public SortedList<int, (int, Vector3)> ReadBarycentric(GameObject obj)
+        {
+            SortedList<int, (int, Vector3)> id2bary = new SortedList<int, (int, Vector3)>();
+            string fieldname = "barycentricCoordinates";
+            string coordname = "coordinate";
+            string triangleIdname = "triangleId";
+
+            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, fieldname);
+            if (bary!=null)
+            {
+                foreach (JProperty x in (JToken)bary)
+                {
+                    int landmarkId = int.Parse(x.Name);
+                    if (id2bary.ContainsKey(landmarkId))
+                        continue;
+                    JObject record = JObject.Parse(x.Value.ToString());
+                    JArray coord = JArray.Parse(record[coordname].ToString());
+                    Vector3 v = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
+                    id2bary.Add(landmarkId, (int.Parse(record[triangleIdname].ToString()), v));
+                }
+            }
+            return id2bary;
         }
 
 
