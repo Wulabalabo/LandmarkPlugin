@@ -25,7 +25,8 @@ namespace Landmark
             //}
             foreach (var componentsInChild in current.GetComponentsInChildren<Transform>())
             {
-                modelBoneData.Add(componentsInChild.gameObject.name, componentsInChild.gameObject);
+                if (componentsInChild.CompareTag("Landmark"))
+                    modelBoneData.Add(componentsInChild.gameObject.name, componentsInChild.gameObject);
             }
 
             return modelBoneData;
@@ -53,7 +54,8 @@ namespace Landmark
                 var str = sr.ReadToEnd();
                 using (FileStream stream = new FileStream(path,FileMode.OpenOrCreate))
                 {
-                    stream.Write(Encoding.UTF8.GetBytes(str));
+                    var bytes = Encoding.UTF8.GetBytes(str);
+                    stream.Write(bytes, 0, bytes.Length);
                     stream.Close();
                 }
                 var data = JObject.Parse(str);
