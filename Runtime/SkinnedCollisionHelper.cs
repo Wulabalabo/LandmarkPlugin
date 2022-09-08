@@ -28,9 +28,9 @@ namespace Landmark
         {
             
             _updateGameObject = obj;
-            _rend = obj.GetComponent(typeof(SkinnedMeshRenderer)) as SkinnedMeshRenderer;
-            _collide = obj.GetComponent(typeof(MeshCollider)) as MeshCollider;
-            _filter=obj.GetComponent<MeshFilter>();
+            _rend = obj.GetOrAddComponent<SkinnedMeshRenderer>();
+            _collide = obj.GetOrAddComponent<MeshCollider>();
+            _filter=obj.GetOrAddComponent<MeshFilter>();
             if (_collide != null && _rend != null)
             {
                 Mesh baseMesh = _rend.sharedMesh;
