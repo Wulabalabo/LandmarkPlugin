@@ -6,5 +6,7 @@ public class GlobalConfig
 {
     public static string DataPath => Application.dataPath;
 
-    public static string LandmarkConfigPath => DataPath + "/Configs/LandmarkConfigs";
+    public static string LandmarkConfigPath =  DataPath + "/Configs/LandmarkConfigs";
+
+    public static string CharactersModelsPath =  DataPath + "/Characters/Prefabs";
 }

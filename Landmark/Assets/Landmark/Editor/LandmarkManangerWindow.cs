@@ -14,7 +14,8 @@ public class LandmarkManangerWindow : EditorWindow
     private SkinnedCollisionHelper _collisionHelper;
     private int _currentClipIndex = 0;
     private string _boneCount="";
-    private float _scale = 0;
+    private float _scale = 0.02f;
+    private bool _mouseSelect;
     LandmarkManangerWindow()
     {
         this.titleContent = new GUIContent("LandmarkEditor");
@@ -26,23 +27,27 @@ public class LandmarkManangerWindow : EditorWindow
     void OnSceneGUI(SceneView iSceneView)
     {
         Event ev = Event.current;
-        if (ev.type == EventType.MouseDown)
+        if (_mouseSelect)
         {
-            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            RaycastHit hit;
-            int layerMask = 0;
-            layerMask |= (1 << LayerMask.NameToLayer("Character"));
-
-            if (Physics.Raycast(ray, out hit, 10, layerMask))
+            if (ev.type == EventType.MouseDown)
             {
-                Transform selected = Selection.activeTransform;
-                if (selected != null && selected.tag.CompareTo("Landmark") == 0)
+                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                RaycastHit hit;
+                int layerMask = 0;
+                layerMask |= (1 << LayerMask.NameToLayer("Character"));
+
+                if (Physics.Raycast(ray, out hit, 10, layerMask))
                 {
-                    selected.transform.position = hit.point;
-                    int landmarkId = int.Parse(selected.name.Remove(0, 8));
-                    Script.Insert2Barycentric(_character, landmarkId, hit.triangleIndex, hit.barycentricCoordinate);
+                    
+                    Transform selected = Selection.activeTransform;
+                    if (selected != null && selected.tag.CompareTo("Landmark") == 0)
+                    {
+                        selected.transform.position = hit.point;
+                        int landmarkId = int.Parse(selected.name.Remove(0, 8));
+                        Script.Insert2Barycentric(_character, landmarkId, hit.triangleIndex, hit.barycentricCoordinate);
+                    }
                 }
-            }
+            }            
         }
     }
 
@@ -75,11 +80,12 @@ public class LandmarkManangerWindow : EditorWindow
             _boneCount = "0";
             if (_character != null)
             {
+                Script.InitCharacter(_character);
                 _collisionHelper.Init(_character.transform.Find("CC_Game_Body").gameObject);
             }
         }
 
-        _scale = EditorGUILayout.FloatField("PointScale", _scale);
+        _scale = EditorGUILayout.FloatField("PointScale", _scale);      
 
         if (_character == null)
         {
@@ -89,8 +95,15 @@ public class LandmarkManangerWindow : EditorWindow
         _boneCount = EditorGUILayout.TextField("Bone:", _boneCount.ToString());
         EditorGUI.EndDisabledGroup();
 
+        if (GUILayout.Button("Save Change"))
+        {
+            Script.SavePrefab(_character);
+        }
+
         #region Generate Landmarks
         SubTitle("Generate Landmarks");
+
+        _mouseSelect=GUILayout.Toggle(_mouseSelect, "MouseSelect");
 
         if (GUILayout.Button("Generate Bone Dictionary"))
         {
@@ -106,7 +119,7 @@ public class LandmarkManangerWindow : EditorWindow
 
         if (GUILayout.Button("Clear Landmarks"))
         {
-            Script.ClearLandmarks();
+            Script.ClearLandmarks(_character);
         }
 
         #endregion

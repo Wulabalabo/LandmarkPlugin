@@ -16,6 +16,46 @@ namespace Landmark
         public List<AnimationClip> AnimationClips = new List<AnimationClip>();
         public List<GameObject> Landmarks = new List<GameObject>();
 
+        public void InitCharacter(GameObject obj)
+        {
+            var info = Utils.GetJPropertyByFile(obj.name, "definition");
+            if (info == null)
+            {
+                Debug.LogError($"Can Not Find {obj.name} Config file");
+                return;
+            }
+            var LandmarkRoot = info.Select(x =>
+            {
+                var temp = (JProperty)x;
+                return temp.Name;
+            }).ToList();
+
+            foreach (var item in obj.GetComponentsInChildren<Transform>())
+            {
+                item.gameObject.layer = LayerMask.NameToLayer("Character");
+                if (LandmarkRoot.Contains(item.name ))
+                {
+                    item.gameObject.tag = "Landmark";
+                }
+            }
+            if (Directory.Exists(GlobalConfig.CharactersModelsPath))
+            {
+                SavePrefab(obj);
+            }
+            else
+            {
+                Debug.LogError($"{GlobalConfig.CharactersModelsPath} Not Exists!");
+                return;
+            }
+            
+            
+        }
+
+        public void SavePrefab(GameObject obj)
+        {
+            UnityEditor.PrefabUtility.SaveAsPrefabAssetAndConnect(obj, $"{GlobalConfig.CharactersModelsPath}/{obj.name}.prefab", UnityEditor.InteractionMode.UserAction);
+        }
+
         public void InitModelBoneData(GameObject obj)
         {           
             ModelBoneDataDictionary.Clear();
@@ -23,7 +63,7 @@ namespace Landmark
         }
         public void GenerateLandmarksForCharacter(GameObject obj, GameObject point, float scale)
         {
-            ClearLandmarks();
+            ClearLandmarks(obj);
             point.transform.localScale = new Vector3(scale, scale, scale);
             var info = Utils.GetJPropertyByFile(obj.name, "definition");
             foreach (var jToken in info)
@@ -117,14 +157,16 @@ namespace Landmark
             }
         }
 
-        public void ClearLandmarks()
+        public void ClearLandmarks(GameObject obj)
         {
+            UnityEditor.PrefabUtility.UnpackPrefabInstance(obj,PrefabUnpackMode.OutermostRoot,InteractionMode.UserAction);
             foreach (var landmark in Landmarks)
             {
                 GameObject.DestroyImmediate(landmark);
             }
 
             Landmarks.Clear();
+            SavePrefab(obj);
         }
 
 
