@@ -15,6 +15,7 @@ namespace Landmark
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
         public List<AnimationClip> AnimationClips = new List<AnimationClip>();
         public List<GameObject> Landmarks = new List<GameObject>();
+        List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
 
         public void InitCharacter(GameObject obj)
         {
@@ -227,7 +228,7 @@ namespace Landmark
         }
 
 
-        public void Insert2Barycentric(GameObject obj, int landmarkId, int triangleIndex, Vector3 barycentricCoordinate)
+        public List<BarycentricCoodinates> Insert2Barycentric(GameObject obj, int landmarkId, int triangleIndex, Vector3 barycentricCoordinate)
         {
             string fieldname = "barycentricCoordinates";
             string coordname = "coordinate";
@@ -244,9 +245,17 @@ namespace Landmark
                 id2bary.Add(landmarkId, (triangleIndex, barycentricCoordinate));
             }
 
+
+
             JObject bary = new JObject();
             foreach (KeyValuePair<int, (int, Vector3)> kvp in id2bary)
             {
+                barycentricCoodinates.Add(new BarycentricCoodinates
+                {
+                    Index=kvp.Key.ToString(),
+                    TriangleId=kvp.Value.Item1,
+                    Coordinate=kvp.Value.Item2
+                });
                 JArray coord = new JArray();
                 coord.Add(kvp.Value.Item2.x);
                 coord.Add(kvp.Value.Item2.y);
@@ -258,7 +267,9 @@ namespace Landmark
 
                 bary[kvp.Key.ToString()] = record;
             }
+            
             Utils.ModifyConfigFile(obj.name, fieldname, bary);
+            return barycentricCoodinates;
         }
 
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
+using UnityEditorInternal;
 
 public class LandmarkManangerWindow : EditorWindow
 {
@@ -12,6 +13,10 @@ public class LandmarkManangerWindow : EditorWindow
     public LandmarkManager Script;
 
     private SkinnedCollisionHelper _collisionHelper;
+    [SerializeField]
+    List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
+    private SerializedObject _objectSo = null;
+    private SerializedProperty _objProperty=null;
     private int _currentClipIndex = 0;
     private string _boneCount="";
     private float _scale = 0.02f;
@@ -42,9 +47,11 @@ public class LandmarkManangerWindow : EditorWindow
                     Transform selected = Selection.activeTransform;
                     if (selected != null && selected.tag.CompareTo("Landmark") == 0)
                     {
+                        barycentricCoodinates.Clear();
                         selected.transform.position = hit.point;
                         int landmarkId = int.Parse(selected.name.Remove(0, 8));
-                        Script.Insert2Barycentric(_character, landmarkId, hit.triangleIndex, hit.barycentricCoordinate);
+                        barycentricCoodinates= Script.Insert2Barycentric(_character, landmarkId, hit.triangleIndex, hit.barycentricCoordinate);
+                        _objectSo.Update();
                     }
                 }
             }            
@@ -54,6 +61,8 @@ public class LandmarkManangerWindow : EditorWindow
     private void OnEnable()
     {
         _collisionHelper = new SkinnedCollisionHelper();
+        _objectSo = new SerializedObject(this);
+        _objProperty = _objectSo.FindProperty("barycentricCoodinates");
     }
 
     private void SubTitle(string title)
@@ -143,7 +152,6 @@ public class LandmarkManangerWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
         #endregion
 
-
         #region Animation
 
         SubTitle("Animation");
@@ -173,6 +181,21 @@ public class LandmarkManangerWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.EndVertical();
+        #endregion
+
+        #region Barycentric Coodinates Controller
+        SubTitle("Barycentric Coodinates");
+
+        _objectSo.Update();
+        
+        EditorGUI.BeginChangeCheck();
+
+        EditorGUILayout.PropertyField(_objProperty, true);
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            _objectSo.ApplyModifiedProperties();
+        }
         #endregion
     }
 }
