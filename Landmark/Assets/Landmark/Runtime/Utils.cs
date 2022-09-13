@@ -25,7 +25,7 @@ namespace Landmark
             //}
             foreach (var componentsInChild in current.GetComponentsInChildren<Transform>())
             {
-                if (componentsInChild.CompareTag("Landmark"))
+                if (componentsInChild.CompareTag("Landmark")&&!componentsInChild.name.Contains("Landmark"))
                     modelBoneData.Add(componentsInChild.gameObject.name, componentsInChild.gameObject);
             }
 
