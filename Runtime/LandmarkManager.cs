@@ -32,11 +32,15 @@ namespace Landmark
             }).ToList();
 
             foreach (var item in obj.GetComponentsInChildren<Transform>())
-            {
-                item.gameObject.layer = LayerMask.NameToLayer("Character");
-                if (LandmarkRoot.Contains(item.name ))
+            {                
+                if (item.gameObject.name.Contains("Landmark"))
                 {
                     item.gameObject.tag = "Landmark";
+                    Landmarks.Add(item.gameObject);
+                }
+                else
+                {
+                    item.gameObject.layer = LayerMask.NameToLayer("Character");
                 }
             }
             if (Directory.Exists(GlobalConfig.CharactersModelsPath))
@@ -225,6 +229,30 @@ namespace Landmark
                     }
                 }
             }
+        }
+
+        public void ConfirmBarycentricChange(GameObject obj,List<BarycentricCoodinates> barycentricCoodinates)
+        {
+            string fieldname = "barycentricCoordinates";
+            string coordname = "coordinate";
+            string triangleIdname = "triangleId";
+
+            JObject bary = new JObject();
+            foreach (var kvp in barycentricCoodinates)
+            {
+                JArray coord = new JArray();
+                coord.Add(kvp.Coordinate.x);
+                coord.Add(kvp.Coordinate.y);
+                coord.Add(kvp.Coordinate.z);
+
+                JObject record = new JObject();
+                record[triangleIdname] = kvp.TriangleId;
+                record[coordname] = coord;
+
+                bary[kvp.Index] = record;
+            }
+
+            Utils.ModifyConfigFile(obj.name, fieldname, bary);
         }
 
 

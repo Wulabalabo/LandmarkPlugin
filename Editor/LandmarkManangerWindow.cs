@@ -196,6 +196,11 @@ public class LandmarkManangerWindow : EditorWindow
         {
             _objectSo.ApplyModifiedProperties();
         }
+
+        if(GUILayout.Button("Confirm Change"))
+        {
+            Script.ConfirmBarycentricChange(_character, barycentricCoodinates);
+        }
         #endregion
     }
 }
