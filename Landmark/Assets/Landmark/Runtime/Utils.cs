@@ -15,17 +15,14 @@ namespace Landmark
         public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject current)
         {
             var modelBoneData = new SerializableDictionary<string, GameObject>();
-            //var repeat = current.GetComponentsInChildren<Transform>().GroupBy(x=>x.name)
-            //    .Where(g => g.Count() > 1)
-            //    .Select(y => y.Key)
-            //    .ToList();
-            //foreach (var group in repeat)
-            //{
-            //    Debug.Log(group);
-            //}
-            foreach (var componentsInChild in current.GetComponentsInChildren<Transform>())
+            var norepeat = current.GetComponentsInChildren<Transform>().GroupBy(x => x.name)
+                .Distinct()
+                .Select(x => x.FirstOrDefault().gameObject)
+                .ToList();
+
+            foreach (var componentsInChild in norepeat)
             {
-                if (componentsInChild.CompareTag("Landmark")&&!componentsInChild.name.Contains("Landmark"))
+                if (!componentsInChild.name.Contains("Landmark"))
                     modelBoneData.Add(componentsInChild.gameObject.name, componentsInChild.gameObject);
             }
 
