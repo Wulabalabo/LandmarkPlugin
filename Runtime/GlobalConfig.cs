@@ -8,5 +8,8 @@ public class GlobalConfig
 
     public static string LandmarkConfigPath =  DataPath + "/Configs/LandmarkConfigs";
 
+    public static string DefaultRadomization = DataPath + "/Configs/DefaultRadomization.json";
+
+
     public static string CharactersModelsPath =  DataPath + "/Characters/Prefabs";
 }

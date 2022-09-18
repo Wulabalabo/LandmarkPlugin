@@ -202,5 +202,29 @@ public class LandmarkManangerWindow : EditorWindow
             Script.ConfirmBarycentricChange(_character, barycentricCoodinates);
         }
         #endregion
+
+        #region Pose Random
+        SubTitle("Pose Random");
+
+        if (GUILayout.Button("RandomPoseTest"))
+        {
+            new PoseRandomization(_character);
+        }
+
+        if (GUILayout.Button("ChangePoseTest"))
+        {
+            PoseRandomization.ChangePose();
+            _collisionHelper.UpdateCollisionMesh();
+        }
+
+        if (GUILayout.Button("ResetPose"))
+        {
+            PoseRandomization.PoseReset();
+            _collisionHelper.UpdateCollisionMesh();
+        }
+        #endregion
+        
+
+        
     }
 }
