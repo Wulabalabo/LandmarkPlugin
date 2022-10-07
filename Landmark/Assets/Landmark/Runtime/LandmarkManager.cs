@@ -162,6 +162,19 @@ namespace Landmark
             }
         }
 
+        void UpdateLandmarks(GameObject obj)
+        {
+            Landmarks.Clear();
+            foreach (Transform landmarkTransform in obj.GetComponentInChildren<Transform>())
+            {
+                if (landmarkTransform.CompareTag("Landmark"))
+                {
+                    Landmarks.Add(landmarkTransform.gameObject);
+                }
+            }
+            Landmarks = Landmarks.OrderBy((item) => int.Parse(item.gameObject.name.Substring(8))).ToList();
+        }
+
         public void ClearLandmarks(GameObject obj)
         {
             UnityEditor.PrefabUtility.UnpackPrefabInstance(obj,PrefabUnpackMode.OutermostRoot,InteractionMode.UserAction);
@@ -177,6 +190,8 @@ namespace Landmark
 
         public void GenerateSkinLandmarks(GameObject obj, string field)
         {
+            UpdateLandmarks(obj);
+
             var info = Utils.GetJPropertyByFile(obj.name, field);
             foreach (JProperty lm in info)
             {
@@ -328,6 +343,8 @@ namespace Landmark
 
         public void ResetSkinLandmarks(GameObject obj, string field)
         {
+            UpdateLandmarks(obj);
+
             var info = Utils.GetJPropertyByFile(obj.name, field);
             foreach (JProperty lm in info)
             {
