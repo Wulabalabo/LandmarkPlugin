@@ -227,4 +227,111 @@ public class LandmarkManangerWindow : EditorWindow
 
         
     }
+
+    void ProceduralLandmark()
+    {
+        #region Elbow Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Elbow Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "elbow");
+        }
+        if (GUILayout.Button("Reset Elbow Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "elbow");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+
+        #region Upperarm Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Upperarm Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "upperarm");
+        }
+        if (GUILayout.Button("Reset Upperarm Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "upperarm");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+
+        #region Shoulder Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Shoulder Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "shoulder");
+        }
+        if (GUILayout.Button("Reset Shoulder Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "shoulder");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+
+        #region Neck Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Neck Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "neck");
+        }
+        if (GUILayout.Button("Reset Neck Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "neck");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+
+        #region Wrist Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Wrist Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "wrist");
+        }
+        if (GUILayout.Button("Reset Wrist Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "wrist");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+
+        #region Hip Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Hip Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "hip");
+        }
+        if (GUILayout.Button("Reset Hip Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "hip");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+
+        #region Knee Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Knee Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "knee");
+        }
+        if (GUILayout.Button("Reset Knee Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "knee");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+
+        #region Ankle Landmarks
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate Ankle Landmarks"))
+        {
+            Script.GenerateSkinLandmarks(_character, "ankle");
+        }
+        if (GUILayout.Button("Reset Ankle Landmarks"))
+        {
+            Script.ResetSkinLandmarks(_character, "ankle");
+        }
+        EditorGUILayout.EndHorizontal();
+        #endregion
+    }
 }
