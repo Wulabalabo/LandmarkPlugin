@@ -11,5 +11,5 @@ public class GlobalConfig
     public static string DefaultRadomization = DataPath + "/Configs/DefaultRadomization.json";
 
 
-    public static string CharactersModelsPath =  DataPath + "/Characters/Prefabs";
+    public static string CharactersModelsPath =  DataPath + "/Resources/Prefabs";
 }

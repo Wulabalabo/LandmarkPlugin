@@ -16,12 +16,7 @@ public class PoseRandomization
     static Dictionary<Transform, List<PoseRandomRange>> RandomKeyValue = new Dictionary<Transform, List<PoseRandomRange>>();
     static Dictionary<Transform, Vector3> initLocalEulerKeyValue = new Dictionary<Transform, Vector3>();
 
-    public PoseRandomization(GameObject character)
-    {
-        init(character);
-    }
-
-    private void init(GameObject character)
+    public static void Init(GameObject character)
     {
         RandomKeyValue.Clear();
         initLocalEulerKeyValue.Clear();
@@ -61,6 +56,11 @@ public class PoseRandomization
 
     public static void ChangePose()
     {
+        if (RandomKeyValue.Count < 0)
+        {
+            Debug.LogError("Need Init First!");
+            return;
+        }
         foreach (var item in RandomKeyValue)
         {
             Vector3 localEuler = item.Key.localEulerAngles;

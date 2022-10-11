@@ -215,7 +215,7 @@ public class LandmarkManangerWindow : EditorWindow
 
         if (GUILayout.Button("RandomPoseTest"))
         {
-            new PoseRandomization(_character);
+            PoseRandomization.Init(_character);
         }
 
         if (GUILayout.Button("ChangePoseTest"))
