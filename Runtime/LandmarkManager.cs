@@ -199,7 +199,6 @@ namespace Landmark
                 Transform jointLandmark = Landmarks[jointId].transform;
                 Transform bodyPart = jointLandmark.parent;
 
-                float distance = 0.5f;
                 Vector3 dir = Vector3.zero;
                 foreach (JProperty x in lm.Value)
                 {
@@ -208,42 +207,55 @@ namespace Landmark
                     switch (x.Name)
                     {
                         case "+x":
-                            dir = bodyPart.right * distance;
+                            dir = bodyPart.right;
                             break;
                         case "-x":
-                            dir = -bodyPart.right * distance;
+                            dir = -bodyPart.right;
                             break;
                         case "+y":
-                            dir = bodyPart.up * distance;
+                            dir = bodyPart.up;
                             break;
                         case "-y":
-                            dir = -bodyPart.up * distance;
+                            dir = -bodyPart.up;
                             break;
                         case "+z":
-                            dir = bodyPart.forward * distance;
+                            dir = bodyPart.forward;
                             break;
                         case "-z":
-                            dir = -bodyPart.forward * distance;
+                            dir = -bodyPart.forward;
                             break;
                     }
-                    RaycastHit hit;
                     int layerMask = 0;
                     layerMask |= (1 << LayerMask.NameToLayer("Character"));
+                    Vector3 start = Landmarks[jointId].transform.position;
 
-                    Vector3 start = landmark.position + dir;
-                    landmark.position = start;
-
-                    if (Physics.Raycast(start, -dir, out hit, 10, layerMask))
+                    RaycastHit hit;
+                    if (RaycastFarthest(start, dir, out hit, 1, layerMask))
                     {
-                        if (hit.collider.name == "CC_Game_Body")
-                        {
-                            landmark.parent = bodyPart;
-                            landmark.position = hit.point;
-                            Insert2Barycentric(obj, skinId, hit.triangleIndex, hit.barycentricCoordinate);
-                        }
+                        landmark.position = hit.point;
+                        WriteBarycentric(obj, skinId, hit.collider.name, hit.triangleIndex, hit.barycentricCoordinate);
                     }
                 }
             }
+        }
+
+        public bool RaycastFarthest(Vector3 origin, Vector3 direction, out RaycastHit raycastHit, float maxDistance, int layerMask)
+        {
+            bool isHit = false;
+            raycastHit = new RaycastHit();
+            Physics.queriesHitBackfaces = true;
+            RaycastHit[] hits = Physics.RaycastAll(origin, direction, maxDistance, layerMask);
+            float max = 0f;
+            foreach (var hit in hits)
+            {
+                if (hit.distance > max)
+                {
+                    max = hit.distance;
+                    raycastHit = hit;
+                    isHit = true;
+                }
+            }
+            return isHit;
         }
 
         public void ConfirmBarycentricChange(GameObject obj,List<BarycentricCoodinates> barycentricCoodinates)
@@ -271,60 +283,61 @@ namespace Landmark
         }
 
 
-        public List<BarycentricCoodinates> Insert2Barycentric(GameObject obj, int landmarkId, int triangleIndex, Vector3 barycentricCoordinate)
+        public List<BarycentricCoodinates> WriteBarycentric(GameObject obj, int landmarkId, string mesh, int triangleIndex, Vector3 barycentricCoordinate)
         {
-            string fieldname = "barycentricCoordinates";
-            string coordname = "coordinate";
-            string triangleIdname = "triangleId";
+            string typeName = "barycentricCoordinates";
+            string meshField = "mesh";
+            string coordField = "coordinate";
+            string triangleIdField = "triangleId";
 
-            SortedList<int, (int, Vector3)> id2bary = ReadBarycentric(obj);
+            SortedList<int, (string, int, Vector3)> id2bary = ReadBarycentric(obj);
 
             if (id2bary.ContainsKey(landmarkId))
             {
-                id2bary[landmarkId] = (triangleIndex, barycentricCoordinate);
+                id2bary.Remove(landmarkId);
             }
-            else
-            {
-                id2bary.Add(landmarkId, (triangleIndex, barycentricCoordinate));
-            }
+
+            id2bary.Add(landmarkId, (mesh, triangleIndex, barycentricCoordinate));
 
 
 
             JObject bary = new JObject();
-            foreach (KeyValuePair<int, (int, Vector3)> kvp in id2bary)
+            foreach (KeyValuePair<int, (string, int, Vector3)> kvp in id2bary)
             {
                 barycentricCoodinates.Add(new BarycentricCoodinates
                 {
-                    Index=kvp.Key.ToString(),
-                    TriangleId=kvp.Value.Item1,
-                    Coordinate=kvp.Value.Item2
+                    Index = kvp.Key.ToString(),
+                    TriangleId = kvp.Value.Item2,
+                    Coordinate = kvp.Value.Item3
                 });
                 JArray coord = new JArray();
-                coord.Add(kvp.Value.Item2.x);
-                coord.Add(kvp.Value.Item2.y);
-                coord.Add(kvp.Value.Item2.z);
+                coord.Add(kvp.Value.Item3.x);
+                coord.Add(kvp.Value.Item3.y);
+                coord.Add(kvp.Value.Item3.z);
 
                 JObject record = new JObject();
-                record[triangleIdname] = kvp.Value.Item1;
-                record[coordname] = coord;
+                record[meshField] = kvp.Value.Item1;
+                record[triangleIdField] = kvp.Value.Item2;
+                record[coordField] = coord;
 
                 bary[kvp.Key.ToString()] = record;
             }
-            
-            Utils.ModifyConfigFile(obj.name, fieldname, bary);
+
+            Utils.ModifyConfigFile(obj.name, typeName, bary);
             return barycentricCoodinates;
         }
 
 
-        public SortedList<int, (int, Vector3)> ReadBarycentric(GameObject obj)
+        public SortedList<int, (string, int, Vector3)> ReadBarycentric(GameObject obj)
         {
-            SortedList<int, (int, Vector3)> id2bary = new SortedList<int, (int, Vector3)>();
-            string fieldname = "barycentricCoordinates";
-            string coordname = "coordinate";
-            string triangleIdname = "triangleId";
+            SortedList<int, (string, int, Vector3)> id2bary = new SortedList<int, (string, int, Vector3)>();
+            string typeName = "barycentricCoordinates";
+            string meshField = "mesh";
+            string coordField = "coordinate";
+            string triangleIdField = "triangleId";
 
-            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, fieldname);
-            if (bary!=null)
+            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, typeName);
+            if (bary != null)
             {
                 foreach (JProperty x in (JToken)bary)
                 {
@@ -332,9 +345,11 @@ namespace Landmark
                     if (id2bary.ContainsKey(landmarkId))
                         continue;
                     JObject record = JObject.Parse(x.Value.ToString());
-                    JArray coord = JArray.Parse(record[coordname].ToString());
-                    Vector3 v = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
-                    id2bary.Add(landmarkId, (int.Parse(record[triangleIdname].ToString()), v));
+                    string mesh = record[meshField].ToString();
+                    int triangleId = int.Parse(record[triangleIdField].ToString());
+                    JArray coord = JArray.Parse(record[coordField].ToString());
+                    Vector3 vec = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
+                    id2bary.Add(landmarkId, (mesh, triangleId, vec));
                 }
             }
             return id2bary;
