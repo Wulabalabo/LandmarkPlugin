@@ -43,14 +43,13 @@ public class LandmarkManangerWindow : EditorWindow
 
                 if (Physics.Raycast(ray, out hit, 10, layerMask))
                 {
-                    
                     Transform selected = Selection.activeTransform;
                     if (selected != null && selected.tag.CompareTo("Landmark") == 0)
                     {
                         barycentricCoodinates.Clear();
                         selected.transform.position = hit.point;
-                        int landmarkId = int.Parse(selected.name.Remove(0, 8));
-                        barycentricCoodinates= Script.Insert2Barycentric(_character, landmarkId, hit.triangleIndex, hit.barycentricCoordinate);
+                        int landmarkId = int.Parse(selected.name.Substring(8));
+                        barycentricCoodinates= Script.WriteBarycentric(_character, landmarkId, hit.collider.name, hit.triangleIndex, hit.barycentricCoordinate);
                         _objectSo.Update();
                     }
                 }
