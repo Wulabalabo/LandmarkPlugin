@@ -42,7 +42,7 @@ namespace Landmark
                     triangles = baseMesh.triangles
                 };
                 _newVert = new Vector3[baseMesh.vertices.Length];
-                short i;
+                ushort i;
                 // Make a CWeightList for each bone in the skinned mesh         
                 _nodeWeights = new CWeightList[_rend.bones.Length];
                 for (i = 0; i < _rend.bones.Length; i++)
