@@ -12,7 +12,7 @@ public class LandmarkManangerWindow : EditorWindow
     public GameObject Point;
     public LandmarkManager Script;
 
-    private SkinnedCollisionHelper _collisionHelper;
+    private List<SkinnedCollisionHelper> _collisionHelpers = new List<SkinnedCollisionHelper>();
     [SerializeField]
     List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
     private SerializedObject _objectSo = null;
@@ -59,7 +59,6 @@ public class LandmarkManangerWindow : EditorWindow
 
     private void OnEnable()
     {
-        _collisionHelper = new SkinnedCollisionHelper();
         _objectSo = new SerializedObject(this);
         _objProperty = _objectSo.FindProperty("barycentricCoodinates");
     }
@@ -89,7 +88,15 @@ public class LandmarkManangerWindow : EditorWindow
             if (_character != null)
             {
                 Script.InitCharacter(_character);
-                _collisionHelper.Init(_character.transform.Find("CC_Game_Body").gameObject);
+                foreach (Transform tf in _character.GetComponentsInChildren<Transform>())
+                {
+                    if (tf.CompareTag("CollisionMesh"))
+                    {
+                        SkinnedCollisionHelper helper = new SkinnedCollisionHelper();
+                        helper.Init(tf.gameObject);
+                        _collisionHelpers.Add(helper);
+                    }
+                }
             }
         }
 
@@ -169,7 +176,8 @@ public class LandmarkManangerWindow : EditorWindow
         if (EditorGUI.EndChangeCheck()&& Script.AnimationClips.Count > 0 && _character != null)
         {
             Script.AnimationClips[_currentClipIndex].SampleAnimation(_character, 0);
-            _collisionHelper.UpdateCollisionMesh();
+            foreach(var helper in _collisionHelpers)
+                helper.UpdateCollisionMesh();
         }
 
         if (GUILayout.Button("Set Default Pose"))
@@ -213,13 +221,15 @@ public class LandmarkManangerWindow : EditorWindow
         if (GUILayout.Button("ChangePoseTest"))
         {
             PoseRandomization.ChangePose();
-            _collisionHelper.UpdateCollisionMesh();
+            foreach (var helper in _collisionHelpers)
+                helper.UpdateCollisionMesh();
         }
 
         if (GUILayout.Button("ResetPose"))
         {
             PoseRandomization.PoseReset();
-            _collisionHelper.UpdateCollisionMesh();
+            foreach (var helper in _collisionHelpers)
+                helper.UpdateCollisionMesh();
         }
         #endregion
         
