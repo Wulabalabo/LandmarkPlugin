@@ -20,10 +20,23 @@ namespace Landmark
         private SkinnedMeshRenderer _rend;
 
         private GameObject _updateGameObject;
+
+        public GameObject UpdateGameObject { get { return _updateGameObject; } }
         // quick pointer to the mesh collider that we're updating
         // Function:    Start
         // This basically translates the information about the skinned mesh into
         // data that we can internally use to quickly update the collision mesh.
+
+        public void Dispose()
+        {
+            _updateGameObject = null;
+            _rend= null;
+            _collide = null;
+            _filter = null;
+            Mesh = null;
+            _nodeWeights = null;
+            _newVert = null;
+        }
         public void Init(GameObject obj)
         {
             

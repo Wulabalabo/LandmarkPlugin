@@ -19,6 +19,7 @@ namespace Landmark
 
         public void InitCharacter(GameObject obj)
         {
+            obj.GetOrAddComponent<Characters>();
             var info = Utils.GetJPropertyByFile(obj.name, "definition");
             if (info == null)
             {
@@ -58,6 +59,7 @@ namespace Landmark
 
         public void SavePrefab(GameObject obj)
         {
+            obj.GetOrAddComponent<Characters>().Landmarks = Landmarks;
             UnityEditor.PrefabUtility.SaveAsPrefabAssetAndConnect(obj, $"{GlobalConfig.CharactersModelsPath}/{obj.name}.prefab", UnityEditor.InteractionMode.UserAction);
         }
 
@@ -160,6 +162,8 @@ namespace Landmark
                     }
                 }
             }
+            var character = obj.GetOrAddComponent<Characters>();
+            character.AnimationClips = AnimationClips;
         }
 
         void UpdateLandmarks(GameObject obj)
