@@ -267,6 +267,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Characters: []
   uiManager: {fileID: 1571186047}
+  logicScriptable: {fileID: 11400000, guid: 349eaae7aa14ba244826dea70d009204, type: 2}
 --- !u!4 &250485934
 Transform:
   m_ObjectHideFlags: 0
@@ -1815,6 +1816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Option: {fileID: 788239118}
+  StartBtn: {fileID: 2089781796}
 --- !u!1 &1678724548
 GameObject:
   m_ObjectHideFlags: 1

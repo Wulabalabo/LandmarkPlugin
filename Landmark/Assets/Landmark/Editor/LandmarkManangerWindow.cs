@@ -83,7 +83,7 @@ public class LandmarkManangerWindow : EditorWindow
         _character = EditorGUILayout.ObjectField("Character:", _character, typeof(GameObject), true) as GameObject;
         if (EditorGUI.EndChangeCheck())
         {
-            Script.AnimationClips.Clear();
+            _currentClipIndex = 0;
             _boneCount = "0";
             if (_character != null)
             {
@@ -164,7 +164,7 @@ public class LandmarkManangerWindow : EditorWindow
 
         EditorGUILayout.BeginVertical();
 
-        if (GUILayout.Button("Import Animation") && _character != null)
+        if (GUILayout.Button("Import Animation"))
         {
             Script.ImportCharacterAnimations(_character);
         }
@@ -172,7 +172,7 @@ public class LandmarkManangerWindow : EditorWindow
         EditorGUILayout.BeginHorizontal();
 
         EditorGUI.BeginChangeCheck();
-        _currentClipIndex = EditorGUILayout.Popup(_currentClipIndex, Script.AnimationClips.Select((item) => item.name).ToArray());
+        _currentClipIndex = EditorGUILayout.Popup(_currentClipIndex, Script.AnimationClips?.Select((item) => item.name).ToArray());
         if (EditorGUI.EndChangeCheck()&& Script.AnimationClips.Count > 0 && _character != null)
         {
             Script.AnimationClips[_currentClipIndex].SampleAnimation(_character, 0);
@@ -182,6 +182,7 @@ public class LandmarkManangerWindow : EditorWindow
 
         if (GUILayout.Button("Set Default Pose"))
         {
+            _currentClipIndex = 0;
             Script.AnimationClips.Clear();
         }
 

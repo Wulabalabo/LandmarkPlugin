@@ -391,8 +391,39 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 10
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: bffd8f1315da3064ca51db4717c297c2, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: bffd8f1315da3064ca51db4717c297c2, type: 3}
+--- !u!1 &3282188839901199996 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bffd8f1315da3064ca51db4717c297c2, type: 3}
+  m_PrefabInstance: {fileID: 2399790289884726061}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6854754175948387165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3282188839901199996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d54abb61dd8882a428a39713d42b3ac4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AnimationClips:
+  - {fileID: 7400000, guid: 1fa9c3387a0b06242b54dd3558e35f9f, type: 2}
+  - {fileID: 7400000, guid: 2b4fefd7533b16f46b10d595443538a4, type: 2}
+  - {fileID: 7400000, guid: 829e58a0a9434fb4c845258e388b9f49, type: 2}
+  - {fileID: 7400000, guid: 2c9b5b056b21cdb4caa58194a1ad9164, type: 2}
+  - {fileID: 7400000, guid: fb1672a44a0ed1a4ea1ea1237fb9ac8d, type: 2}
+  - {fileID: 7400000, guid: 82676d69ea215134c85b95539b355bae, type: 2}
+  - {fileID: 7400000, guid: 087a8fa50cc61ef4999dc1001200c05d, type: 2}
+  - {fileID: 7400000, guid: 855b4588e73aa2b4487ef0f69406449e, type: 2}
+  - {fileID: 7400000, guid: 87e5aad63cc58254a801c7b077ecd1fa, type: 2}
+  - {fileID: 7400000, guid: 561967dedd6202f4fbfd3c26c38832e5, type: 2}
+  - {fileID: 7400000, guid: f0f34cc2d544e52448b660cde96e40dc, type: 2}
+  - {fileID: 7400000, guid: 6175b2830861bf3429d515b94cf8bab0, type: 2}
 --- !u!1 &6894224412911311971 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -80800780153168050, guid: bffd8f1315da3064ca51db4717c297c2, type: 3}
