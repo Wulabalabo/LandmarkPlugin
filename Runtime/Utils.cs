@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace Landmark
 {
+    
     public static class Utils
     {
         public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject current)
@@ -181,20 +182,156 @@ namespace Landmark
 
         public static LandmarkModuel CaculateLandmarkModuel(string imagePath,GameObject obj)
         {
-            List<LandmarkInfo> landmarks = getVisibility(obj);
+            List<LandmarkInfo> landmarks = GetLandmarkInfos(obj);
             CharacterBingdingBox characterBingdingBox = GetBoundingBox(obj);
             return new LandmarkModuel(imagePath, landmarks, characterBingdingBox);
         }
 
-        private static List<LandmarkInfo> getVisibility(GameObject obj)
+        private static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold=100)
         {
-            var visibilities = obj.GetComponent<Characters>().Visibility;
-            return null;
+            bool isInsideOfScreen(Vector3 pixCoord)
+            {
+                int height = Screen.currentResolution.height;
+                int width = Screen.currentResolution.width;
+
+                if (pixCoord.x >= 0 && pixCoord.x < width && pixCoord.y >= 0 && pixCoord.y <= height)
+                    return true;
+                return false;
+            }
+
+            var joint2skins = obj.GetComponent<Characters>().Visibility;
+            var landmarks = FindLandmarks(obj);
+            List<LandmarkInfo> infos = new List<LandmarkInfo>();
+            List<int> hitCount = new List<int>();
+            Dictionary<int, int> skin2joint = new Dictionary<int, int>();
+
+            // Init
+            for (int i = 0; i < landmarks.Count; ++i)
+            {
+                hitCount.Add(0);
+            }
+            foreach(var kvp in joint2skins)
+            {
+                int jointId = kvp.Key;
+                var skinIds = kvp.Value;
+
+                foreach(var skinId in skinIds)
+                {
+                    skin2joint.Add(skinId, jointId);
+                }
+            }
+            
+
+            RaycastHit hit;
+            int layerMask = LayerMask.GetMask("Raycastable") | LayerMask.GetMask("Character") | LayerMask.GetMask("Landmark");
+
+            // Raycast on every landmark
+            for (int id = 0; id < landmarks.Count; ++id)
+            {
+                Vector3 pixCoord = Camera.main.WorldToScreenPoint(landmarks[id].transform.position);
+
+                // if pixCoord is out of the screen, skip
+                if (!isInsideOfScreen(pixCoord))
+                    continue;
+
+                var meshFilter = landmarks[id].GetComponent<MeshFilter>();
+                Vector3 start = Camera.main.transform.position;
+
+                // raycast on every vertex on the mesh
+                foreach (Vector3 vertex in meshFilter.sharedMesh.vertices)
+                {
+                    Vector3 end = landmarks[id].transform.TransformPoint(vertex);
+                    if (Physics.Linecast(start, end, out hit, layerMask))
+                    {
+                        if (hit.collider.gameObject == landmarks[id])
+                        {
+                            ++hitCount[id];
+
+                            // if this is a skin landmark
+                            if (skin2joint.ContainsKey(id))
+                            {
+                                int hitJointLandmarkId = skin2joint[id];
+                                ++hitCount[hitJointLandmarkId];
+                            }
+                        }
+                    }
+                }
+            }
+
+            // set LandmarkInfo for each landmark
+            for (int id = 0; id < landmarks.Count; ++id)
+            {
+                Vector3 pixCoord = Camera.main.WorldToScreenPoint(landmarks[id].transform.position);
+
+                var info = new LandmarkInfo();
+                info.X = pixCoord.x;
+                info.Y = pixCoord.y;
+                info.Z = pixCoord.z;
+                info.visibility = Visibility.Unlabelled;
+
+                // if pixCoord is inside of the screen
+                if (isInsideOfScreen(pixCoord))
+                {
+                    if (joint2skins.ContainsKey(id))
+                    {
+                        if (hitCount[id] > hitThreshold * 2)
+                            info.visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        if (hitCount[id] > hitThreshold)
+                            info.visibility = Visibility.Visible;
+                    }
+                }
+
+                infos.Add(info);
+            }
+            return infos;
         } 
 
         private static CharacterBingdingBox GetBoundingBox(GameObject obj)
         {
-            return new CharacterBingdingBox();
+            var min = Vector2.positiveInfinity;
+            var max = Vector2.negativeInfinity;
+            GameObject body = obj.transform.Find("CC_Game_Body").gameObject;
+            MeshFilter filter = body.GetComponent<MeshFilter>();
+            Mesh mesh = filter.mesh;
+            foreach (Vector3 vertex in mesh.vertices)
+            {
+                Vector3 p = body.transform.TransformPoint(vertex);
+                Vector3 q = Camera.main.WorldToScreenPoint(p);
+                min.x = Mathf.Min(min.x, q.x);
+                min.y = Mathf.Min(min.y, q.y);
+                max.x = Mathf.Max(max.x, q.x);
+                max.y = Mathf.Max(max.y, q.y);
+            }
+
+            var bbox = new CharacterBingdingBox();
+            bbox.X = min.x;
+            bbox.Y = max.y;
+            bbox.Width = max.x - min.x;
+            bbox.Height = max.y - min.y;
+            return bbox;
+        }
+
+        static List<GameObject> FindLandmarks(GameObject obj)
+        {
+            List<GameObject> landmarks = new List<GameObject>();
+            Dictionary<int, GameObject> id2landmark = new Dictionary<int, GameObject>();
+            foreach (Transform landmarkTransform in obj.GetComponentInChildren<Transform>())
+            {
+                if (landmarkTransform.CompareTag("Landmark"))
+                {
+                    int id = int.Parse(landmarkTransform.name.Substring(8));
+                    id2landmark.Add(id, landmarkTransform.gameObject);
+                }
+            }
+
+            for (int i=0; i<id2landmark.Count; ++i)
+                landmarks.Add(id2landmark[i]);
+
+            id2landmark.Clear();
+            return landmarks;
         }
     }
 
