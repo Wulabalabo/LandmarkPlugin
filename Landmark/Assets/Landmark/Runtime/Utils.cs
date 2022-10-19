@@ -179,18 +179,22 @@ namespace Landmark
             sw.Close();
         }
 
-        public static LandmarkModuel CaculateLandmarkModuel(GameObject obj)
+        public static LandmarkModuel CaculateLandmarkModuel(string imagePath,GameObject obj)
         {
-            return new LandmarkModuel("test",new List<LandmarkInfo>()
-            {
-                new LandmarkInfo()
-                {
-                    visibility=Visibility.unlabeld,
-                    X=1,
-                    Y=0,
-                    Z=2
-                }
-            },new CharacterBingdingBox() { Height=1,Width=2,X=3,Y=4});
+            List<LandmarkInfo> landmarks = getVisibility(obj);
+            CharacterBingdingBox characterBingdingBox = GetBoundingBox(obj);
+            return new LandmarkModuel(imagePath, landmarks, characterBingdingBox);
+        }
+
+        private static List<LandmarkInfo> getVisibility(GameObject obj)
+        {
+            var visibilities = obj.GetComponent<Characters>().Visibility;
+            return null;
+        } 
+
+        private static CharacterBingdingBox GetBoundingBox(GameObject obj)
+        {
+            return new CharacterBingdingBox();
         }
     }
 
