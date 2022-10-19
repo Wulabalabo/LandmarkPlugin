@@ -5,9 +5,9 @@ using UnityEngine;
 
 public enum Visibility
 {
-    unlabeld=0,
-    invisible=1,
-    visible=2,    
+    Unlabelled = 0,
+    Invisible = 1,
+    Visible = 2,    
 }
 
 public struct LandmarkInfo
