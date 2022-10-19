@@ -13,6 +13,7 @@ namespace Landmark
     {
         [SerializeField]
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
+        public SerializableDictionary<string, int[]> VisibilityDictionary;
         public List<AnimationClip> AnimationClips = new List<AnimationClip>();
         public List<GameObject> Landmarks = new List<GameObject>();
         List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
@@ -20,7 +21,9 @@ namespace Landmark
         public void InitCharacter(GameObject obj)
         {
             obj.GetOrAddComponent<Characters>();
+            VisibilityDictionary.Clear();
             var info = Utils.GetJPropertyByFile(obj.name, "definition");
+            var visibility = Utils.GetJPropertyByFile(obj.name, "visibility");
             if (info == null)
             {
                 Debug.LogError($"Can Not Find {obj.name} Config file");
@@ -31,6 +34,12 @@ namespace Landmark
                 var temp = (JProperty)x;
                 return temp.Name;
             }).ToList();
+
+            foreach (var jToken in visibility)
+            {
+                var jProperty = (JProperty)jToken;
+                VisibilityDictionary.Add(jProperty.Name, jProperty.Value.Select((a) => { return (int)a; }).ToArray());
+            }
 
             foreach (var item in obj.GetComponentsInChildren<Transform>())
             {                
@@ -60,6 +69,7 @@ namespace Landmark
         public void SavePrefab(GameObject obj)
         {
             obj.GetOrAddComponent<Characters>().Landmarks = Landmarks;
+            obj.GetOrAddComponent<Characters>().Visibility=VisibilityDictionary;
             UnityEditor.PrefabUtility.SaveAsPrefabAssetAndConnect(obj, $"{GlobalConfig.CharactersModelsPath}/{obj.name}.prefab", UnityEditor.InteractionMode.UserAction);
         }
 

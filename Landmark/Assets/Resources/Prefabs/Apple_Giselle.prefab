@@ -436,6 +436,7 @@ MonoBehaviour:
   - {fileID: 7400000, guid: 3e71a02b87f213640bb3b360a91ede25, type: 2}
   - {fileID: 7400000, guid: 17c10cd915acca142baf8b3770917501, type: 2}
   - {fileID: 7400000, guid: 27956bdc16eb25d43b26f99ddf03cfd5, type: 2}
+  Landmarks: []
 --- !u!1 &5582491768541159968 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -80800780153168050, guid: 6c4e8bb25fea4cc49990c6d1790b7e91, type: 3}
