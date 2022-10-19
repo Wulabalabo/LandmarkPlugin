@@ -10,6 +10,8 @@ public class GlobalConfig
 
     public static string DefaultRadomization = DataPath + "/Configs/DefaultRadomization.json";
 
+    public static string PoseRadomizationConfigPath = DataPath + "/Configs/";
+
     public static string LandmarkInfoSavePath = DataPath + "/Info";
 
     public static string CharactersModelsPath =  DataPath + "/Resources/Prefabs";

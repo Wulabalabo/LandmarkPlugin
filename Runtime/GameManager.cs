@@ -19,8 +19,6 @@ namespace Landmark
         public UiManager uiManager;
         public LogicScriptable logicScriptable;
 
-        //todo! SkinMeshHelper when animation done,need do this!
-
         public GameObject CurrentCharacter { get; private set; }
 
         private void Awake()

@@ -20,37 +20,47 @@ public class PoseRandomization
     {
         RandomKeyValue.Clear();
         initLocalEulerKeyValue.Clear();
-        if (File.Exists(GlobalConfig.DefaultRadomization))
+        var path = GlobalConfig.PoseRadomizationConfigPath + "PoseRadomization/" + character.name + ".json";
+        JObject data;
+
+        if (File.Exists(path))
+        {
+            StreamReader sr = new StreamReader(path);
+            data = JObject.Parse(sr.ReadToEnd());
+            sr.Close();
+        }
+        else
         {
             StreamReader sr = new StreamReader(GlobalConfig.DefaultRadomization);
-            var data = JObject.Parse(sr.ReadToEnd());
+            data = JObject.Parse(sr.ReadToEnd());
             sr.Close();
-            var roots = character.transform.Find("root").gameObject.GetComponentsInChildren<Transform>();
+        }           
+        
+        var roots = character.transform.Find("root").gameObject.GetComponentsInChildren<Transform>();
 
-            foreach (var pair in data)
+        foreach (var pair in data)
+        {
+            var tempPoseRangeList = new List<PoseRandomRange>();
+            foreach (var item in JObject.Parse(pair.Value.ToString()))
             {
-                var tempPoseRangeList = new List<PoseRandomRange>();
-                foreach (var item in JObject.Parse(pair.Value.ToString()))
+                tempPoseRangeList.Add(new PoseRandomRange()
                 {
-                    tempPoseRangeList.Add(new PoseRandomRange()
-                    {
-                        Axis = item.Key,
-                        Min = (float)item.Value[0],
-                        Max = (float)item.Value[1]
-                    });
-                }
+                    Axis = item.Key,
+                    Min = (float)item.Value[0],
+                    Max = (float)item.Value[1]
+                });
+            }
 
-                foreach (var item in roots)
+            foreach (var item in roots)
+            {
+                if (item.name == pair.Key.ToString())
                 {
-                    if (item.name == pair.Key.ToString())
-                    {
-                        initLocalEulerKeyValue.Add(item, item.localEulerAngles);
-                        RandomKeyValue.Add(item, tempPoseRangeList);
-                    }
+                    initLocalEulerKeyValue.Add(item, item.localEulerAngles);
+                    RandomKeyValue.Add(item, tempPoseRangeList);
                 }
-
             }
         }
+        
     }
 
 
