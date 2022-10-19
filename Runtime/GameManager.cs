@@ -117,21 +117,24 @@ namespace Landmark
             var dataPath = _infoSavePath + "/data.json";
             var animations = character.GetComponent<Characters>().AnimationClips;
             animations = animations.GetRange(0, logicScriptable.EachFixedPosesTimes);
-
+            //fixed animation
             for (int i = 0; i < animations.Count; i++)
             {
                 animations[i].SampleAnimation(character, 0);
                 SkinnedCollisionHelper.UpdateCollisionMesh();
-                var data = Utils.CaculateLandmarkModuel(character);
+
+                var data = Utils.CaculateLandmarkModuel("imagePath",character);
                 Utils.WriteData(dataPath, data);
                 yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
             }
-
+            //random animation
             PoseRandomization.Init(CurrentCharacter);
             for (int i = 0; i < logicScriptable.EachRandomPosesTimes; i++)
             {
                 PoseRandomization.ChangePose();
                 SkinnedCollisionHelper.UpdateCollisionMesh();
+                var data = Utils.CaculateLandmarkModuel("imagePath",character);
+                Utils.WriteData(dataPath, data);
                 yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
             }
             PoseRandomization.PoseReset();
