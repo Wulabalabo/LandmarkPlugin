@@ -183,8 +183,8 @@ namespace Landmark
         public static LandmarkModuel CaculateLandmarkModuel(string imagePath,GameObject obj)
         {
             List<LandmarkInfo> landmarks = GetLandmarkInfos(obj);
-            CharacterBingdingBox characterBingdingBox = GetBoundingBox(obj);
-            return new LandmarkModuel(imagePath, landmarks, characterBingdingBox);
+            CharacterBoundingBox characterBoundingBox = GetBoundingBox(obj);
+            return new LandmarkModuel(imagePath, landmarks, characterBoundingBox);
         }
 
         private static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold=100)
@@ -287,9 +287,9 @@ namespace Landmark
                 infos.Add(info);
             }
             return infos;
-        } 
+        }
 
-        private static CharacterBingdingBox GetBoundingBox(GameObject obj)
+        private static CharacterBoundingBox GetBoundingBox(GameObject obj)
         {
             var min = Vector2.positiveInfinity;
             var max = Vector2.negativeInfinity;
@@ -306,7 +306,7 @@ namespace Landmark
                 max.y = Mathf.Max(max.y, q.y);
             }
 
-            var bbox = new CharacterBingdingBox();
+            var bbox = new CharacterBoundingBox();
             bbox.X = min.x;
             bbox.Y = max.y;
             bbox.Width = max.x - min.x;
@@ -332,6 +332,111 @@ namespace Landmark
 
             id2landmark.Clear();
             return landmarks;
+        }
+
+        static SortedList<int, (string, int, Vector3)> ReadBarycentric(GameObject obj)
+        {
+            SortedList<int, (string, int, Vector3)> id2bary = new SortedList<int, (string, int, Vector3)>();
+            string typeName = "barycentricCoordinates";
+            string meshField = "mesh";
+            string coordField = "coordinate";
+            string triangleIndexField = "triangleIndex";
+
+            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, typeName);
+            if (bary != null)
+            {
+                foreach (JProperty x in (JToken)bary)
+                {
+                    int landmarkId = int.Parse(x.Name);
+                    if (id2bary.ContainsKey(landmarkId))
+                        continue;
+                    JObject record = JObject.Parse(x.Value.ToString());
+                    string mesh = record[meshField].ToString();
+                    int triangleIndex = int.Parse(record[triangleIndexField].ToString());
+                    JArray coord = JArray.Parse(record[coordField].ToString());
+                    Vector3 vec = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
+                    id2bary.Add(landmarkId, (mesh, triangleIndex, vec));
+                }
+            }
+            return id2bary;
+        }
+
+        static List<BarycentricCoodinates> WriteBarycentric(GameObject obj, int landmarkId, string mesh, int triangleIndex, Vector3 barycentricCoordinate)
+        {
+            string typeName = "barycentricCoordinates";
+            string meshField = "mesh";
+            string coordField = "coordinate";
+            string triangleIndexField = "triangleIndex";
+
+            List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
+
+            SortedList<int, (string, int, Vector3)> id2bary = ReadBarycentric(obj);
+
+            if (id2bary.ContainsKey(landmarkId))
+            {
+                id2bary.Remove(landmarkId);
+            }
+
+            id2bary.Add(landmarkId, (mesh, triangleIndex, barycentricCoordinate));
+
+
+
+            JObject bary = new JObject();
+            foreach (KeyValuePair<int, (string, int, Vector3)> kvp in id2bary)
+            {
+                barycentricCoodinates.Add(new BarycentricCoodinates
+                {
+                    LandmarkIndex = kvp.Key.ToString(),
+                    TriangleIndex = kvp.Value.Item2,
+                    Coordinate = kvp.Value.Item3
+                });
+                JArray coord = new JArray();
+                coord.Add(kvp.Value.Item3.x);
+                coord.Add(kvp.Value.Item3.y);
+                coord.Add(kvp.Value.Item3.z);
+
+                JObject record = new JObject();
+                record[meshField] = kvp.Value.Item1;
+                record[triangleIndexField] = kvp.Value.Item2;
+                record[coordField] = coord;
+
+                bary[kvp.Key.ToString()] = record;
+            }
+
+            ModifyConfigFile(obj.name, typeName, bary);
+            return barycentricCoodinates;
+        }
+
+        static void ApplyBarycentricCoordinates(GameObject obj)
+        {
+            var landmarks = FindLandmarks(obj);
+            var bary = ReadBarycentric(obj);
+            
+            // find all GameObjects with tag "CollisionMesh"
+            Dictionary<string, MeshFilter> collisionMeshFilters = new Dictionary<string, MeshFilter>();
+            foreach(Transform tf in obj.GetComponentsInChildren<Transform>())
+            {
+                if (tf.CompareTag("CollisionMesh"))
+                {
+                    collisionMeshFilters.Add(tf.name, tf.GetComponent<MeshFilter>());
+                }
+            }
+
+            foreach(var kvp in bary)
+            {
+                int landmarkId = kvp.Key;
+                string meshName = kvp.Value.Item1;
+                int triangleIndex = kvp.Value.Item2;
+                Vector3 coord = kvp.Value.Item3;
+
+                MeshFilter meshFilter = collisionMeshFilters[meshName];
+                Mesh mesh = meshFilter.mesh;
+
+                Vector3 x = mesh.vertices[triangleIndex];
+                Vector3 y = mesh.vertices[triangleIndex+1];
+                Vector3 z = mesh.vertices[triangleIndex+2];
+                landmarks[landmarkId].transform.position = meshFilter.transform.TransformPoint(x * coord.x + y * coord.y + z * coord.z);
+            }
         }
     }
 
