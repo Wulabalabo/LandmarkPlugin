@@ -12,6 +12,7 @@ namespace Landmark
     {
         private static GameManager _instance;
         private string _infoSavePath;
+        private List<SkinnedCollisionHelper> _collisionHelpers=new List<SkinnedCollisionHelper>();
         public static GameManager instance { get { return _instance; } }
 
         public List<GameObject> Characters = new List<GameObject>();
@@ -42,7 +43,6 @@ namespace Landmark
         private void Init()
         {
             Utils.CreateDirctory(GlobalConfig.LandmarkInfoSavePath);
-            SkinnedCollisionHelper = new SkinnedCollisionHelper();
             var prefabs = Resources.LoadAll("Prefabs");
             Characters = prefabs.Select((item) =>
             {
@@ -95,7 +95,19 @@ namespace Landmark
             for (int i = 0; i < 1; i++)
             {
                 CurrentCharacter = Instantiate(Characters[i], pos.position, Quaternion.identity);
-                SkinnedCollisionHelper.Init(CurrentCharacter.transform.Find("CC_Game_Body").gameObject);
+                foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
+                {
+                    if (transform.CompareTag("CollisionMesh"))
+                    {
+                        SkinnedCollisionHelper helper = new SkinnedCollisionHelper();
+                        if (transform.gameObject.name.Equals("CC_Game_Body"))
+                        {
+                            SkinnedCollisionHelper = helper;
+                        }
+                        helper.Init(transform.gameObject);
+                        _collisionHelpers.Add(helper);
+                    }
+                }               
                 _infoSavePath = GlobalConfig.LandmarkInfoSavePath + "/" + CurrentCharacter.name + DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
                 Utils.CreateDirctory(_infoSavePath);
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
@@ -121,7 +133,10 @@ namespace Landmark
             for (int i = 0; i < animations.Count; i++)
             {
                 animations[i].SampleAnimation(character, 0);
-                SkinnedCollisionHelper.UpdateCollisionMesh();
+                foreach (var collisionHelper in _collisionHelpers)
+                {
+                    collisionHelper.UpdateCollisionMesh();
+                }
 
                 var data = Utils.CaculateLandmarkModuel("imagePath",character);
                 Utils.WriteData(dataPath, data);
@@ -132,7 +147,10 @@ namespace Landmark
             for (int i = 0; i < logicScriptable.EachRandomPosesTimes; i++)
             {
                 PoseRandomization.ChangePose();
-                SkinnedCollisionHelper.UpdateCollisionMesh();
+                foreach (var collisionHelper in _collisionHelpers)
+                {
+                    collisionHelper.UpdateCollisionMesh();
+                }
                 var data = Utils.CaculateLandmarkModuel("imagePath",character);
                 Utils.WriteData(dataPath, data);
                 yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
