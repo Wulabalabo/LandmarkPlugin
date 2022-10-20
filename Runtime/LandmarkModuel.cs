@@ -18,7 +18,7 @@ public struct LandmarkInfo
     public Visibility visibility;
 }
 
-public struct CharacterBingdingBox
+public struct CharacterBoundingBox
 {
     public float X;
     public float Y;
@@ -30,9 +30,9 @@ public class LandmarkModuel
 {
     public string ImagePath;
     public List<LandmarkInfo> ScreenCoordinate;
-    public CharacterBingdingBox CharacterBindingBox;
+    public CharacterBoundingBox CharacterBindingBox;
 
-    public LandmarkModuel(string imagePath, List<LandmarkInfo> screenCoordinate, CharacterBingdingBox characterBindingBox)
+    public LandmarkModuel(string imagePath, List<LandmarkInfo> screenCoordinate, CharacterBoundingBox characterBindingBox)
     {
         ImagePath = imagePath;
         ScreenCoordinate = screenCoordinate;
