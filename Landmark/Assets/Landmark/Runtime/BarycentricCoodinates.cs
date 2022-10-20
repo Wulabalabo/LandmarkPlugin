@@ -5,7 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public class BarycentricCoodinates
 {
-    public string Index;
-    public int TriangleId;
+    public string mesh;
+    public string LandmarkIndex;
+    public int TriangleIndex;
     public Vector3 Coordinate;
 }
