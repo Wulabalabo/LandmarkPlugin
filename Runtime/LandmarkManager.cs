@@ -276,7 +276,7 @@ namespace Landmark
         {
             string fieldname = "barycentricCoordinates";
             string coordname = "coordinate";
-            string triangleIdname = "triangleId";
+            string triangleIndexname = "triangleIndex";
 
             JObject bary = new JObject();
             foreach (var kvp in barycentricCoodinates)
@@ -287,10 +287,10 @@ namespace Landmark
                 coord.Add(kvp.Coordinate.z);
 
                 JObject record = new JObject();
-                record[triangleIdname] = kvp.TriangleId;
+                record[triangleIndexname] = kvp.TriangleIndex;
                 record[coordname] = coord;
 
-                bary[kvp.Index] = record;
+                bary[kvp.LandmarkIndex] = record;
             }
 
             Utils.ModifyConfigFile(obj.name, fieldname, bary);
@@ -302,7 +302,7 @@ namespace Landmark
             string typeName = "barycentricCoordinates";
             string meshField = "mesh";
             string coordField = "coordinate";
-            string triangleIdField = "triangleId";
+            string triangleIndexField = "triangleIndex";
 
             SortedList<int, (string, int, Vector3)> id2bary = ReadBarycentric(obj);
 
@@ -320,8 +320,8 @@ namespace Landmark
             {
                 barycentricCoodinates.Add(new BarycentricCoodinates
                 {
-                    Index = kvp.Key.ToString(),
-                    TriangleId = kvp.Value.Item2,
+                    LandmarkIndex = kvp.Key.ToString(),
+                    TriangleIndex = kvp.Value.Item2,
                     Coordinate = kvp.Value.Item3
                 });
                 JArray coord = new JArray();
@@ -331,7 +331,7 @@ namespace Landmark
 
                 JObject record = new JObject();
                 record[meshField] = kvp.Value.Item1;
-                record[triangleIdField] = kvp.Value.Item2;
+                record[triangleIndexField] = kvp.Value.Item2;
                 record[coordField] = coord;
 
                 bary[kvp.Key.ToString()] = record;
@@ -348,7 +348,7 @@ namespace Landmark
             string typeName = "barycentricCoordinates";
             string meshField = "mesh";
             string coordField = "coordinate";
-            string triangleIdField = "triangleId";
+            string triangleIndexField = "triangleIndex";
 
             JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, typeName);
             if (bary != null)
@@ -360,10 +360,10 @@ namespace Landmark
                         continue;
                     JObject record = JObject.Parse(x.Value.ToString());
                     string mesh = record[meshField].ToString();
-                    int triangleId = int.Parse(record[triangleIdField].ToString());
+                    int triangleIndex = int.Parse(record[triangleIndexField].ToString());
                     JArray coord = JArray.Parse(record[coordField].ToString());
                     Vector3 vec = new Vector3(float.Parse(coord[0].ToString()), float.Parse(coord[1].ToString()), float.Parse(coord[2].ToString()));
-                    id2bary.Add(landmarkId, (mesh, triangleId, vec));
+                    id2bary.Add(landmarkId, (mesh, triangleIndex, vec));
                 }
             }
             return id2bary;
