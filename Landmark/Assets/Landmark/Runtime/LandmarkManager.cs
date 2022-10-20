@@ -321,6 +321,7 @@ namespace Landmark
                 barycentricCoodinates.Add(new BarycentricCoodinates
                 {
                     LandmarkIndex = kvp.Key.ToString(),
+                    Mesh = kvp.Value.Item1,
                     TriangleIndex = kvp.Value.Item2,
                     Coordinate = kvp.Value.Item3
                 });
