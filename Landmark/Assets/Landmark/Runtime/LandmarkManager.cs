@@ -13,7 +13,7 @@ namespace Landmark
     {
         [SerializeField]
         public SerializableDictionary<string, GameObject> ModelBoneDataDictionary;
-        public SerializableDictionary<string, int[]> VisibilityDictionary;
+        public SerializableDictionary<int, int[]> VisibilityDictionary;
         public List<AnimationClip> AnimationClips = new List<AnimationClip>();
         public List<GameObject> Landmarks = new List<GameObject>();
         List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
@@ -38,7 +38,7 @@ namespace Landmark
             foreach (var jToken in visibility)
             {
                 var jProperty = (JProperty)jToken;
-                VisibilityDictionary.Add(jProperty.Name, jProperty.Value.Select((a) => { return (int)a; }).ToArray());
+                VisibilityDictionary.Add(int.Parse(jProperty.Name), jProperty.Value.Select((a) => { return (int)a; }).ToArray());
             }
 
             foreach (var item in obj.GetComponentsInChildren<Transform>())
