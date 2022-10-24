@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -171,24 +172,46 @@ namespace Landmark
             return transforms;
         }
 
-        public static void WriteData<T>(string filePath, T t)
+        public static void WriteData(string filePath, LandmarkModuel moduel)
         {
-            var json = JsonConvert.SerializeObject(t);
             var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
-            sw.WriteLine(json);
+            string visibilities = "";
+            foreach (var item in moduel.ScreenCoordinate)
+            {
+                visibilities += "\""+ "("+item.X+","+item.Y+","+item.X+","+(int)item.visibility+")"+ "\""+",";
+            }
+            string bbox = "\""+"("+moduel.CharacterBindingBox.X+","+moduel.CharacterBindingBox.Y + "," + moduel.CharacterBindingBox.Width + "," + moduel.CharacterBindingBox.Height+")"+ "\"";
+            var context = moduel.ImagePath+","+visibilities+bbox;
+            sw.WriteLine(context);
             sw.Close();
         }
 
-        public static LandmarkModuel CaculateLandmarkModuel(string imagePath,GameObject obj)
+        public static void WriteTitle(string filePath)
         {
+            var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.Write("Image,");
+            for (int i = 0; i < 134; ++i)
+            {
+                sw.Write($"{i},");
+            }
+            sw.Write("BBox\n");
+            sw.Close();
+        }
+
+
+        public static LandmarkModuel CaculateLandmarkModuel(string imagePath,ScopeInfo info,GameObject obj)
+        {
+            var specimagePath = ScreenShort(imagePath, info);
             List<LandmarkInfo> landmarks = GetLandmarkInfos(obj);
             CharacterBoundingBox characterBoundingBox = GetBoundingBox(obj);
-            return new LandmarkModuel(imagePath, landmarks, characterBoundingBox);
+            return new LandmarkModuel(specimagePath, landmarks, characterBoundingBox);
         }
 
         private static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold=100)
         {
+            var characterScript = obj.GetComponent<Characters>();
             bool isInsideOfScreen(Vector3 pixCoord)
             {
                 int height = Screen.currentResolution.height;
@@ -199,8 +222,8 @@ namespace Landmark
                 return false;
             }
 
-            var joint2skins = obj.GetComponent<Characters>().Visibility;
-            var landmarks = FindLandmarks(obj);
+            var joint2skins = characterScript.Visibility;
+            var landmarks = characterScript.Landmarks;
             List<LandmarkInfo> infos = new List<LandmarkInfo>();
             List<int> hitCount = new List<int>();
             Dictionary<int, int> skin2joint = new Dictionary<int, int>();
@@ -286,6 +309,7 @@ namespace Landmark
 
                 infos.Add(info);
             }
+            Debug.Log(infos.Count);
             return infos;
         }
 
@@ -407,9 +431,9 @@ namespace Landmark
             return barycentricCoodinates;
         }
 
-        static void ApplyBarycentricCoordinates(GameObject obj)
+        public static void ApplyBarycentricCoordinates(GameObject obj)
         {
-            var landmarks = FindLandmarks(obj);
+            var landmarks = obj.GetComponent<Characters>().Landmarks;
             var bary = ReadBarycentric(obj);
             
             // find all GameObjects with tag "CollisionMesh"
@@ -437,6 +461,13 @@ namespace Landmark
                 Vector3 z = mesh.vertices[triangleIndex+2];
                 landmarks[landmarkId].transform.position = meshFilter.transform.TransformPoint(x * coord.x + y * coord.y + z * coord.z);
             }
+        }
+
+        public static string ScreenShort(string path,ScopeInfo info)
+        {
+            var specpath = path+"-"+$"{info.SceneId}-{info.CharacterName}-{info.SpawnpointName}-{info.Facing}-{info.Pose}.jpg";
+            ScreenCapture.CaptureScreenshot(specpath);
+            return specpath;
         }
     }
 

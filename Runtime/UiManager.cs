@@ -26,6 +26,12 @@ namespace Landmark
             GameManager.instance.DoLogic());
         }
 
+        public void Display(bool display)
+        {
+            Option.gameObject.SetActive(display);
+            StartBtn.gameObject.SetActive(display);
+        }
+
 
     }
 }
