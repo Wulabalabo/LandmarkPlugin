@@ -5225,7 +5225,7 @@ GameObject:
   - component: {fileID: 8717691378031790562}
   m_Layer: 10
   m_Name: CC_Game_Body
-  m_TagString: Untagged
+  m_TagString: CollisionMesh
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

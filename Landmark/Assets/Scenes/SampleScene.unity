@@ -268,6 +268,7 @@ MonoBehaviour:
   Characters: []
   uiManager: {fileID: 1571186047}
   logicScriptable: {fileID: 11400000, guid: 349eaae7aa14ba244826dea70d009204, type: 2}
+  CurrentCharacter: {fileID: 0}
 --- !u!4 &250485934
 Transform:
   m_ObjectHideFlags: 0

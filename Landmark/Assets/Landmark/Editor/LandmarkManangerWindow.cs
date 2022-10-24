@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEditorInternal;
 
-public class LandmarkManangerWindow : EditorWindow
+public class LandmarkManangerWindow : EditorWindow  
 {
     private GameObject _character;
     public GameObject Point;
