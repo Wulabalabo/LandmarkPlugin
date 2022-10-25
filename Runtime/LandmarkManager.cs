@@ -186,7 +186,7 @@ namespace Landmark
                     Landmarks.Add(landmarkTransform.gameObject);
                 }
             }
-            Landmarks = Landmarks.OrderBy((item) => int.Parse(item.gameObject.name.Substring(8))).ToList();
+            Landmarks = Landmarks.OrderBy((item) => int.Parse(item.name.Substring(8))).ToList();
         }
 
         public void ClearLandmarks(GameObject obj)
