@@ -341,20 +341,15 @@ namespace Landmark
         static List<GameObject> FindLandmarks(GameObject obj)
         {
             List<GameObject> landmarks = new List<GameObject>();
-            Dictionary<int, GameObject> id2landmark = new Dictionary<int, GameObject>();
-            foreach (Transform landmarkTransform in obj.GetComponentInChildren<Transform>())
+            foreach (var item in obj.GetComponentsInChildren<Transform>())
             {
-                if (landmarkTransform.CompareTag("Landmark"))
+                if (item.gameObject.CompareTag("Landmark"))
                 {
-                    int id = int.Parse(landmarkTransform.name.Substring(8));
-                    id2landmark.Add(id, landmarkTransform.gameObject);
+                    landmarks.Add(item.gameObject);
                 }
             }
 
-            for (int i=0; i<id2landmark.Count; ++i)
-                landmarks.Add(id2landmark[i]);
-
-            id2landmark.Clear();
+            landmarks = landmarks.OrderBy((item) => int.Parse(item.name.Substring(8))).ToList();
             return landmarks;
         }
 
@@ -366,7 +361,7 @@ namespace Landmark
             string coordField = "coordinate";
             string triangleIndexField = "triangleIndex";
 
-            JObject bary = (JObject)Utils.GetJPropertyByFile(obj.name, typeName);
+            JObject bary = (JObject)GetJPropertyByFile(obj.name, typeName);
             if (bary != null)
             {
                 foreach (JProperty x in (JToken)bary)
@@ -446,7 +441,7 @@ namespace Landmark
                 }
             }
 
-            foreach(var kvp in bary)
+            foreach (var kvp in bary)
             {
                 int landmarkId = kvp.Key;
                 string meshName = kvp.Value.Item1;
@@ -455,11 +450,13 @@ namespace Landmark
 
                 MeshFilter meshFilter = collisionMeshFilters[meshName];
                 Mesh mesh = meshFilter.mesh;
-
-                Vector3 x = mesh.vertices[triangleIndex];
-                Vector3 y = mesh.vertices[triangleIndex+1];
-                Vector3 z = mesh.vertices[triangleIndex+2];
-                landmarks[landmarkId].transform.position = meshFilter.transform.TransformPoint(x * coord.x + y * coord.y + z * coord.z);
+                Vector3[] vertices = mesh.vertices;
+                int[] triangles = mesh.triangles;
+                Vector3 p0 = vertices[triangles[triangleIndex * 3]];
+                Vector3 p1 = vertices[triangles[triangleIndex * 3 + 1]];
+                Vector3 p2 = vertices[triangles[triangleIndex * 3 + 2]];
+                Vector3 point = p0 * coord.x + p1 * coord.y + p2 * coord.z;
+                landmarks[landmarkId].transform.position = meshFilter.transform.TransformPoint(point);
             }
         }
 
