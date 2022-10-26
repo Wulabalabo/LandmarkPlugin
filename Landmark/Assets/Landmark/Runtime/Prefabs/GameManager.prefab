@@ -47,6 +47,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ModelBoneDataDictionary:
     list: []
+  VisibilityDictionary:
+    list: []
   AnimationClips: []
   Landmarks: []
 --- !u!114 &4140364137012028870
@@ -61,3 +63,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d78c21d656adcfe45b9e7501affcee24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Characters: []
+  uiManager: {fileID: 0}
+  logicScriptable: {fileID: 11400000, guid: 349eaae7aa14ba244826dea70d009204, type: 2}
+  CurrentCharacter: {fileID: 0}
+  IsSceneChangeDone: 0

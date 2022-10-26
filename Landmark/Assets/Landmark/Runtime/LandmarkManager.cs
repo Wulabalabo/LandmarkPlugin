@@ -16,11 +16,11 @@ namespace Landmark
         public SerializableDictionary<int, int[]> VisibilityDictionary;
         public List<AnimationClip> AnimationClips = new List<AnimationClip>();
         public List<GameObject> Landmarks = new List<GameObject>();
-        List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
+        List<BarycentricCoodinatesModule> barycentricCoodinates = new List<BarycentricCoodinatesModule>();
 
         public void InitCharacter(GameObject obj)
         {
-            obj.GetOrAddComponent<Characters>();
+            obj.GetOrAddComponent<CharacterModule>();
             VisibilityDictionary.Clear();
             var info = Utils.GetJPropertyByFile(obj.name, "definition");
             var visibility = Utils.GetJPropertyByFile(obj.name, "visibility");
@@ -68,8 +68,8 @@ namespace Landmark
 
         public void SavePrefab(GameObject obj)
         {
-            obj.GetOrAddComponent<Characters>().Landmarks = Landmarks;
-            obj.GetOrAddComponent<Characters>().Visibility=VisibilityDictionary;
+            obj.GetOrAddComponent<CharacterModule>().Landmarks = Landmarks;
+            obj.GetOrAddComponent<CharacterModule>().Visibility=VisibilityDictionary;
             UnityEditor.PrefabUtility.SaveAsPrefabAssetAndConnect(obj, $"{GlobalConfig.CharactersModelsPath}/{obj.name}.prefab", UnityEditor.InteractionMode.UserAction);
         }
 
@@ -172,7 +172,7 @@ namespace Landmark
                     }
                 }
             }
-            var character = obj.GetOrAddComponent<Characters>();
+            var character = obj.GetOrAddComponent<CharacterModule>();
             character.AnimationClips = AnimationClips;
         }
 
@@ -272,7 +272,7 @@ namespace Landmark
             return isHit;
         }
 
-        public void ConfirmBarycentricChange(GameObject obj,List<BarycentricCoodinates> barycentricCoodinates)
+        public void ConfirmBarycentricChange(GameObject obj,List<BarycentricCoodinatesModule> barycentricCoodinates)
         {
             string fieldname = "barycentricCoordinates";
             string coordname = "coordinate";
@@ -297,7 +297,7 @@ namespace Landmark
         }
 
 
-        public List<BarycentricCoodinates> WriteBarycentric(GameObject obj, int landmarkId, string mesh, int triangleIndex, Vector3 barycentricCoordinate)
+        public List<BarycentricCoodinatesModule> WriteBarycentric(GameObject obj, int landmarkId, string mesh, int triangleIndex, Vector3 barycentricCoordinate)
         {
             string typeName = "barycentricCoordinates";
             string meshField = "mesh";
@@ -318,7 +318,7 @@ namespace Landmark
             JObject bary = new JObject();
             foreach (KeyValuePair<int, (string, int, Vector3)> kvp in id2bary)
             {
-                barycentricCoodinates.Add(new BarycentricCoodinates
+                barycentricCoodinates.Add(new BarycentricCoodinatesModule
                 {
                     LandmarkIndex = kvp.Key.ToString(),
                     Mesh = kvp.Value.Item1,
