@@ -181,7 +181,7 @@ namespace Landmark
             {
                 visibilities += "\""+ "("+item.X+","+item.Y+","+item.X+","+(int)item.visibility+")"+ "\""+",";
             }
-            string bbox = "\""+"("+moduel.CharacterBindingBox.X+","+moduel.CharacterBindingBox.Y + "," + moduel.CharacterBindingBox.Width + "," + moduel.CharacterBindingBox.Height+")"+ "\"";
+            string bbox = "\""+"("+moduel.CharacterBindingBox.X+","+moduel.CharacterBindingBox.Y + " " + moduel.CharacterBindingBox.Width + "," + moduel.CharacterBindingBox.Height+")"+ "\"";
             var context = moduel.ImagePath+","+visibilities+bbox;
             sw.WriteLine(context);
             sw.Close();
@@ -309,7 +309,6 @@ namespace Landmark
 
                 infos.Add(info);
             }
-            Debug.Log(infos.Count);
             return infos;
         }
 
@@ -462,9 +461,10 @@ namespace Landmark
 
         public static string ScreenShort(string path,ScopeInfo info)
         {
-            var specpath = path+"-"+$"{info.SceneId}-{info.CharacterName}-{info.SpawnpointName}-{info.Facing}-{info.Pose}.jpg";
+            var imagepath = $"{info.SceneId}-{info.CharacterName}-{info.SpawnpointName}-{info.Facing}-{info.Pose}.jpg";
+            var specpath = path+"/"+ imagepath;
             ScreenCapture.CaptureScreenshot(specpath);
-            return specpath;
+            return imagepath;
         }
     }
 

@@ -22,8 +22,11 @@ namespace Landmark
         public SkinnedCollisionHelper SkinnedCollisionHelper { get; private set; }
         public UiManager uiManager;
         public LogicScriptable logicScriptable;
+        
 
         public GameObject CurrentCharacter;
+        public bool IsSceneChangeDone = false;
+        public Func<string,int> StartSceneChange;
 
         private void Awake()
         {
@@ -64,22 +67,30 @@ namespace Landmark
         internal void DoLogic()
         {
             Debug.Log("Start");
+            #region generate save info
+            _infoSaveTime = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
+            _infoSaveDirctory = GlobalConfig.LandmarkInfoSavePath + "/" + _infoSaveTime ;
+            _infoSavePath = GlobalConfig.LandmarkInfoSavePath + "/" + _infoSaveTime + ".csv";
+            Utils.CreateDirctory(_infoSaveDirctory);
+            Utils.WriteTitle(_infoSavePath);
+            #endregion
+
+
+            //StartSceneChange += (string a) => { return 0; };
+            //IsSceneChangeDone = true;
+
             uiManager.Display(false);
             StartCoroutine(SceneChangeLogic());
         }
 
-        bool ChangeSceneLogic()
-        {
-            return false;
-        }
 
         IEnumerator SceneChangeLogic()
         {
             _currentScope = new ScopeInfo();
             foreach (var item in logicScriptable.ScenesLogic)
             {
-                _currentScope.SceneId = 0;
-                //yield return new WaitUntil(() => ChangeSceneLogic());
+                _currentScope.SceneId=StartSceneChange.Invoke(item.Key);
+                yield return new WaitUntil(() => IsSceneChangeDone);
                 yield return StartCoroutine(PositionChangeLogic(item.Value));
             }
             Debug.Log("Done");
@@ -100,9 +111,10 @@ namespace Landmark
 
         IEnumerator CharactorLogic(Transform pos)
         {
-            //for (int i = 0; i < Characters.Count; i++)
-            //{
+            for (int i = 0; i < Characters.Count; i++)
+            {
                 CurrentCharacter = Instantiate(Characters[0], pos.position, Quaternion.identity);
+                CurrentCharacter.name = CurrentCharacter.name.Replace("(Clone)", "");
                 _currentScope.CharacterName = CurrentCharacter.name;
                 foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
                 {
@@ -118,13 +130,7 @@ namespace Landmark
                     }
                 }
 
-                #region generate save info
-                _infoSaveTime = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-                _infoSaveDirctory = GlobalConfig.LandmarkInfoSavePath + "/" + _infoSaveTime + CurrentCharacter.name ;
-                _infoSavePath = GlobalConfig.LandmarkInfoSavePath + "/" + _infoSaveTime + CurrentCharacter.name + ".csv";
-                Utils.CreateDirctory(_infoSaveDirctory);
-                Utils.WriteTitle(_infoSavePath);
-                #endregion
+                
 
 
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
@@ -155,7 +161,7 @@ namespace Landmark
                 _collisionHelpers.Clear();
                 Destroy(CurrentCharacter);
                 CurrentCharacter = null;
-            //}
+            }
         }
 
         private IEnumerator PosesLogic(GameObject character)
