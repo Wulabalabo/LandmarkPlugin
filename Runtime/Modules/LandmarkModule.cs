@@ -26,13 +26,13 @@ public struct CharacterBoundingBox
     public float Height;
 }
 
-public class LandmarkModuel 
+public class LandmarkModule 
 {
     public string ImagePath;
     public List<LandmarkInfo> ScreenCoordinate;
     public CharacterBoundingBox CharacterBindingBox;
 
-    public LandmarkModuel(string imagePath, List<LandmarkInfo> screenCoordinate, CharacterBoundingBox characterBindingBox)
+    public LandmarkModule(string imagePath, List<LandmarkInfo> screenCoordinate, CharacterBoundingBox characterBindingBox)
     {
         ImagePath = imagePath;
         ScreenCoordinate = screenCoordinate;

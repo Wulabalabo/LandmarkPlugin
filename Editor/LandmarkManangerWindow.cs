@@ -14,7 +14,7 @@ public class LandmarkManangerWindow : EditorWindow
 
     private List<SkinnedCollisionHelper> _collisionHelpers = new List<SkinnedCollisionHelper>();
     [SerializeField]
-    List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
+    List<BarycentricCoodinatesModule> barycentricCoodinates = new List<BarycentricCoodinatesModule>();
     private SerializedObject _objectSo = null;
     private SerializedProperty _objProperty=null;
     private int _currentClipIndex = 0;

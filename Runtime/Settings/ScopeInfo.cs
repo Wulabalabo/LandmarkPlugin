@@ -12,6 +12,9 @@ namespace Landmark
         public string SpawnpointName;
         public string Facing;
         public string Pose;
+        public string InfoSaveDirctory;
+        public string InfoSaveTime;
+        public string InfoSavePath;
     }
 
 }

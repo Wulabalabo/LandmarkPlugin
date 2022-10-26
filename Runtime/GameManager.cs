@@ -11,22 +11,19 @@ namespace Landmark
     public class GameManager : MonoBehaviour
     {
         private static GameManager _instance;
-        private string _infoSaveDirctory;
-        private string _infoSavePath;
-        private string _infoSaveTime;
         private ScopeInfo _currentScope;
-        private List<SkinnedCollisionHelper> _collisionHelpers=new List<SkinnedCollisionHelper>();
+        private bool _isSceneChangeDone = false;
+        private List<SkinnedCollisionHelper> _collisionHelpers = new List<SkinnedCollisionHelper>();
         public static GameManager instance { get { return _instance; } }
 
         public List<GameObject> Characters = new List<GameObject>();
         public SkinnedCollisionHelper SkinnedCollisionHelper { get; private set; }
         public UiManager uiManager;
         public LogicScriptable logicScriptable;
-        
+
 
         public GameObject CurrentCharacter;
-        public bool IsSceneChangeDone = false;
-        public Func<string,int> StartSceneChange;
+        public Action<string> OnSceneChangeCompleted;
 
         private void Awake()
         {
@@ -48,7 +45,7 @@ namespace Landmark
 
         private void Init()
         {
-            Utils.CreateDirctory(GlobalConfig.LandmarkInfoSavePath);
+            Utils.CreateDirctory(logicScriptable.OutputDirctory);
             var prefabs = Resources.LoadAll("Prefabs");
             Characters = prefabs.Select((item) =>
             {
@@ -67,30 +64,42 @@ namespace Landmark
         internal void DoLogic()
         {
             Debug.Log("Start");
-            #region generate save info
-            _infoSaveTime = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            _infoSaveDirctory = GlobalConfig.LandmarkInfoSavePath + "/" + _infoSaveTime ;
-            _infoSavePath = GlobalConfig.LandmarkInfoSavePath + "/" + _infoSaveTime + ".csv";
-            Utils.CreateDirctory(_infoSaveDirctory);
-            Utils.WriteTitle(_infoSavePath);
-            #endregion
+
+            _currentScope = new ScopeInfo()
+            {
+                InfoSaveTime = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss")
+
+            };
+
+            _currentScope.InfoSaveDirctory = logicScriptable.OutputDirctory + "/" + _currentScope.InfoSaveTime;
+            _currentScope.InfoSavePath = logicScriptable.OutputDirctory + "/" + _currentScope.InfoSaveTime + ".csv";
 
 
-            //StartSceneChange += (string a) => { return 0; };
-            //IsSceneChangeDone = true;
+            Utils.CreateDirctory(_currentScope.InfoSaveDirctory);
+            Utils.WriteTitle(_currentScope.InfoSavePath);
 
             uiManager.Display(false);
             StartCoroutine(SceneChangeLogic());
         }
 
+        public void SceneLogic(string SceneName)
+        {            
+            var process = SceneManager.LoadSceneAsync(SceneName);
+            process.completed += (a) =>
+            {
+                OnSceneChangeCompleted?.Invoke(SceneName);
+                _currentScope.SceneId = SceneManager.GetActiveScene().buildIndex;
+                _isSceneChangeDone = true;
+            };
+            _isSceneChangeDone = false;
+        }
 
         IEnumerator SceneChangeLogic()
         {
-            _currentScope = new ScopeInfo();
             foreach (var item in logicScriptable.ScenesLogic)
             {
-                _currentScope.SceneId=StartSceneChange.Invoke(item.Key);
-                yield return new WaitUntil(() => IsSceneChangeDone);
+                SceneLogic(item.Key);
+                yield return new WaitUntil(() => _isSceneChangeDone);
                 yield return StartCoroutine(PositionChangeLogic(item.Value));
             }
             Debug.Log("Done");
@@ -100,7 +109,7 @@ namespace Landmark
 
         IEnumerator PositionChangeLogic(GameObject gameObject)
         {
-            var objs =gameObject.GetComponentsInChildren<Transform>();
+            var objs = gameObject.GetComponentsInChildren<Transform>();
             foreach (var obj in objs)
             {
                 _currentScope.SpawnpointName = obj.name;
@@ -130,21 +139,21 @@ namespace Landmark
                     }
                 }
 
-                
+
 
 
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
                 {
                     _currentScope.Facing = logicScriptable.Facings[j].ToString();
                     CurrentCharacter.transform.localRotation = Quaternion.Euler(Vector3.up * logicScriptable.Facings[j]);
-                    Utils.AutoCameraPositioning(CurrentCharacter,pos);
+                    Utils.AutoCameraPositioning(CurrentCharacter, pos);
                     yield return StartCoroutine(PosesLogic(CurrentCharacter));
                 }
                 //random animation
                 PoseRandomization.Init(CurrentCharacter);
                 _currentScope.Facing = "";
                 for (int k = 0; k < logicScriptable.EachRandomPosesTimes; k++)
-                {                    
+                {
                     PoseRandomization.ChangePose();
                     foreach (var collisionHelper in _collisionHelpers)
                     {
@@ -152,9 +161,9 @@ namespace Landmark
                     }
                     Utils.ApplyBarycentricCoordinates(CurrentCharacter);
                     _currentScope.Pose = "RandmoPose" + k.ToString();
-                   
-                    var data = Utils.CaculateLandmarkModuel(_infoSaveDirctory,_currentScope,CurrentCharacter);
-                    Utils.WriteData(_infoSavePath,data);
+
+                    var data = Utils.CaculateLandmarkModuel(_currentScope.InfoSaveDirctory, _currentScope, CurrentCharacter);
+                    Utils.WriteData(_currentScope.InfoSavePath, data);
                     yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
                 }
                 PoseRandomization.PoseReset();
@@ -166,8 +175,8 @@ namespace Landmark
 
         private IEnumerator PosesLogic(GameObject character)
         {
-            
-            var animations = character.GetComponent<Characters>().AnimationClips;
+
+            var animations = character.GetComponent<CharacterModule>().AnimationClips;
             animations = animations.GetRange(0, logicScriptable.EachFixedPosesTimes);
             //fixed animation
             for (int i = 0; i < animations.Count; i++)
@@ -179,11 +188,11 @@ namespace Landmark
                 }
                 Utils.ApplyBarycentricCoordinates(character);
                 _currentScope.Pose = animations[i].name;
-                var data = Utils.CaculateLandmarkModuel(_infoSaveDirctory, _currentScope,character);
-                Utils.WriteData(_infoSavePath,data);
+                var data = Utils.CaculateLandmarkModuel(_currentScope.InfoSaveDirctory, _currentScope, character);
+                Utils.WriteData(_currentScope.InfoSavePath, data);
                 yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
-            }   
-            
+            }
+
         }
     }
 }

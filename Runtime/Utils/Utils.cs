@@ -104,7 +104,7 @@ namespace Landmark
             
             Mesh mesh = GameManager.instance.SkinnedCollisionHelper.Mesh;
 
-            var landmarks = targetObject.GetComponent<Characters>().Landmarks;
+            var landmarks = targetObject.GetComponent<CharacterModule>().Landmarks;
 
             if (landmarks.Count <= 0)
             {
@@ -172,7 +172,7 @@ namespace Landmark
             return transforms;
         }
 
-        public static void WriteData(string filePath, LandmarkModuel moduel)
+        public static void WriteData(string filePath, LandmarkModule moduel)
         {
             var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
@@ -201,17 +201,17 @@ namespace Landmark
         }
 
 
-        public static LandmarkModuel CaculateLandmarkModuel(string imagePath,ScopeInfo info,GameObject obj)
+        public static LandmarkModule CaculateLandmarkModuel(string imagePath,ScopeInfo info,GameObject obj)
         {
             var specimagePath = ScreenShort(imagePath, info);
             List<LandmarkInfo> landmarks = GetLandmarkInfos(obj);
             CharacterBoundingBox characterBoundingBox = GetBoundingBox(obj);
-            return new LandmarkModuel(specimagePath, landmarks, characterBoundingBox);
+            return new LandmarkModule(specimagePath, landmarks, characterBoundingBox);
         }
 
         private static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold=100)
         {
-            var characterScript = obj.GetComponent<Characters>();
+            var characterScript = obj.GetComponent<CharacterModule>();
             bool isInsideOfScreen(Vector3 pixCoord)
             {
                 int height = Screen.currentResolution.height;
@@ -379,14 +379,14 @@ namespace Landmark
             return id2bary;
         }
 
-        static List<BarycentricCoodinates> WriteBarycentric(GameObject obj, int landmarkId, string mesh, int triangleIndex, Vector3 barycentricCoordinate)
+        static List<BarycentricCoodinatesModule> WriteBarycentric(GameObject obj, int landmarkId, string mesh, int triangleIndex, Vector3 barycentricCoordinate)
         {
             string typeName = "barycentricCoordinates";
             string meshField = "mesh";
             string coordField = "coordinate";
             string triangleIndexField = "triangleIndex";
 
-            List<BarycentricCoodinates> barycentricCoodinates = new List<BarycentricCoodinates>();
+            List<BarycentricCoodinatesModule> barycentricCoodinates = new List<BarycentricCoodinatesModule>();
 
             SortedList<int, (string, int, Vector3)> id2bary = ReadBarycentric(obj);
 
@@ -402,7 +402,7 @@ namespace Landmark
             JObject bary = new JObject();
             foreach (KeyValuePair<int, (string, int, Vector3)> kvp in id2bary)
             {
-                barycentricCoodinates.Add(new BarycentricCoodinates
+                barycentricCoodinates.Add(new BarycentricCoodinatesModule
                 {
                     LandmarkIndex = kvp.Key.ToString(),
                     TriangleIndex = kvp.Value.Item2,
@@ -427,7 +427,7 @@ namespace Landmark
 
         public static void ApplyBarycentricCoordinates(GameObject obj)
         {
-            var landmarks = obj.GetComponent<Characters>().Landmarks;
+            var landmarks = obj.GetComponent<CharacterModule>().Landmarks;
             var bary = ReadBarycentric(obj);
             
             // find all GameObjects with tag "CollisionMesh"
