@@ -20,7 +20,7 @@ public class PoseRandomization
     {
         RandomKeyValue.Clear();
         initLocalEulerKeyValue.Clear();
-        var path = GlobalConfig.PoseRadomizationConfigPath + "PoseRadomization/" + character.name + ".json";
+        var path = GlobalConfig.PoseRadomizationConfigPath + "PoseRandomization/" + character.name + ".json";
         JObject data;
 
         if (File.Exists(path))
