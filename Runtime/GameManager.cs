@@ -112,7 +112,11 @@ namespace Landmark
 
         IEnumerator PositionChangeLogic(GameObject gameObject)
         {
-            var objs = gameObject.GetComponentsInChildren<Transform>();
+            var objs = gameObject.GetComponentsInChildren<Transform>().Where((item) =>
+            {
+                return item.name != gameObject.name;
+            }).ToList();
+            
             foreach (var obj in objs)
             {
                 _currentScope.SpawnpointName = obj.name;
@@ -127,6 +131,7 @@ namespace Landmark
             {
                 CurrentCharacter = Instantiate(Characters[0], pos.position, Quaternion.identity);
                 CurrentCharacter.name = CurrentCharacter.name.Replace("(Clone)", "");
+                Utils.DisplayLandmark(CurrentCharacter);
                 _currentScope.CharacterName = CurrentCharacter.name;
                 foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
                 {

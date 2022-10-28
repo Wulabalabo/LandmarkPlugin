@@ -15,8 +15,11 @@ public class LocalSceneManager : MonoBehaviour
 
     void SwitchRenderPipeline(int id)
     {
-        GraphicsSettings.defaultRenderPipeline = RenderPipelineAssetList[id];
-        QualitySettings.renderPipeline = RenderPipelineAssetList[id];
+        if (RenderPipelineAssetList.Length > 0)
+        {
+            GraphicsSettings.defaultRenderPipeline = RenderPipelineAssetList[id];
+            QualitySettings.renderPipeline = RenderPipelineAssetList[id];
+        }
     }
 
     public void Init()

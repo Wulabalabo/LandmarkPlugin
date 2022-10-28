@@ -466,6 +466,15 @@ namespace Landmark
             ScreenCapture.CaptureScreenshot(specpath);
             return imagepath;
         }
+
+        public static void DisplayLandmark(GameObject character)
+        {
+            var module = character.GetComponent<CharacterModule>();
+            foreach (var item in module.Landmarks)
+            {
+                item.GetComponent<MeshRenderer>().enabled = false;
+            }
+        }
     }
 
 }
