@@ -12,18 +12,19 @@ namespace Landmark
     {
         private static GameManager _instance;
         private ScopeInfo _currentScope;
-        private bool _isSceneChangeDone = false;
+        public bool IsSceneChangeDone = false;
         private List<SkinnedCollisionHelper> _collisionHelpers = new List<SkinnedCollisionHelper>();
         public static GameManager instance { get { return _instance; } }
 
         public List<GameObject> Characters = new List<GameObject>();
         public SkinnedCollisionHelper SkinnedCollisionHelper { get; private set; }
         public UiManager uiManager;
+        public LocalSceneManager localSceneManager;
         public LogicScriptable logicScriptable;
 
 
         public GameObject CurrentCharacter;
-        public Action<string> OnSceneChangeCompleted;
+        public Action<int> OnSceneChangeCompleted;
 
         private void Awake()
         {
@@ -46,12 +47,14 @@ namespace Landmark
         private void Init()
         {
             Utils.CreateDirctory(logicScriptable.OutputDirctory);
+
             var prefabs = Resources.LoadAll("Prefabs");
             Characters = prefabs.Select((item) =>
             {
                 return item as GameObject;
             }).ToList();
             uiManager.InitOption();
+            localSceneManager.Init();
         }
 
 
@@ -82,16 +85,16 @@ namespace Landmark
             StartCoroutine(SceneChangeLogic());
         }
 
+
         public void SceneLogic(string SceneName)
         {            
             var process = SceneManager.LoadSceneAsync(SceneName);
             process.completed += (a) =>
             {
-                OnSceneChangeCompleted?.Invoke(SceneName);
                 _currentScope.SceneId = SceneManager.GetActiveScene().buildIndex;
-                _isSceneChangeDone = true;
+                OnSceneChangeCompleted?.Invoke(_currentScope.SceneId);                
             };
-            _isSceneChangeDone = false;
+            IsSceneChangeDone = false;
         }
 
         IEnumerator SceneChangeLogic()
@@ -99,7 +102,7 @@ namespace Landmark
             foreach (var item in logicScriptable.ScenesLogic)
             {
                 SceneLogic(item.Key);
-                yield return new WaitUntil(() => _isSceneChangeDone);
+                yield return new WaitUntil(() => IsSceneChangeDone);
                 yield return StartCoroutine(PositionChangeLogic(item.Value));
             }
             Debug.Log("Done");
