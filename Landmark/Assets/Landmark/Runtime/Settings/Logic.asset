@@ -19,7 +19,7 @@ MonoBehaviour:
     - Key: SampleScene2
       Value: {fileID: 5863827335941942189, guid: d5e54c55fed2d5d41a7e7862c1080e8d, type: 3}
   Facings: 000000005a0000000e010000
-  EachFixedPosesTimes: 6
-  EachRandomPosesTimes: 6
+  EachFixedPosesTimes: 1
+  EachRandomPosesTimes: 1
   EachAnimationDuration: 0.5
   OutputDirctory: D:/Work/alanprojects/LandmarkPlugin/Landmark/Assets/Output

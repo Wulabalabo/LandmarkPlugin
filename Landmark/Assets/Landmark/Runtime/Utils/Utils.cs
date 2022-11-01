@@ -201,9 +201,9 @@ namespace Landmark
         }
 
 
-        public static LandmarkModule CaculateLandmarkModuel(string imagePath,ScopeInfo info,GameObject obj)
+        public static LandmarkModule CaculateLandmarkModuel(ScopeInfo info,GameObject obj)
         {
-            var specimagePath = ScreenShort(imagePath, info);
+            var specimagePath = $"{info.SceneId}-{info.CharacterName}-{info.SpawnpointName}-{info.Facing}-{info.Pose}.jpg"; ;
             List<LandmarkInfo> landmarks = GetLandmarkInfos(obj);
             CharacterBoundingBox characterBoundingBox = GetBoundingBox(obj);
             return new LandmarkModule(specimagePath, landmarks, characterBoundingBox);
@@ -457,14 +457,6 @@ namespace Landmark
                 Vector3 point = p0 * coord.x + p1 * coord.y + p2 * coord.z;
                 landmarks[landmarkId].transform.position = meshFilter.transform.TransformPoint(point);
             }
-        }
-
-        public static string ScreenShort(string path,ScopeInfo info)
-        {
-            var imagepath = $"{info.SceneId}-{info.CharacterName}-{info.SpawnpointName}-{info.Facing}-{info.Pose}.jpg";
-            var specpath = path+"/"+ imagepath;
-            ScreenCapture.CaptureScreenshot(specpath);
-            return imagepath;
         }
 
         public static void DisplayLandmark(GameObject character)

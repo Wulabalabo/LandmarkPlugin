@@ -107,7 +107,7 @@ namespace Landmark
             }
             Debug.Log("Done");
             uiManager.Display(true);
-            yield break;
+            yield return new WaitForEndOfFrame();
         }
 
         IEnumerator PositionChangeLogic(GameObject gameObject)
@@ -147,14 +147,12 @@ namespace Landmark
                     }
                 }
 
-
-
-
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
-                {
+                {                   
                     _currentScope.Facing = logicScriptable.Facings[j].ToString();
                     CurrentCharacter.transform.localRotation = Quaternion.Euler(Vector3.up * logicScriptable.Facings[j]);
                     Utils.AutoCameraPositioning(CurrentCharacter, pos);
+                    yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
                     yield return StartCoroutine(PosesLogic(CurrentCharacter));
                 }
                 //random animation
@@ -162,6 +160,7 @@ namespace Landmark
                 _currentScope.Facing = "";
                 for (int k = 0; k < logicScriptable.EachRandomPosesTimes; k++)
                 {
+                    PoseRandomization.PoseReset();
                     PoseRandomization.ChangePose();
                     foreach (var collisionHelper in _collisionHelpers)
                     {
@@ -170,14 +169,15 @@ namespace Landmark
                     Utils.ApplyBarycentricCoordinates(CurrentCharacter);
                     _currentScope.Pose = "RandmoPose" + k.ToString();
 
-                    var data = Utils.CaculateLandmarkModuel(_currentScope.InfoSaveDirctory, _currentScope, CurrentCharacter);
+                    var data = Utils.CaculateLandmarkModuel(_currentScope, CurrentCharacter);
                     Utils.WriteData(_currentScope.InfoSavePath, data);
                     yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+
+                    yield return new WaitForEndOfFrame();
+                    ScreenCapture.CaptureScreenshot(_currentScope.InfoSaveDirctory + "/" + data.ImagePath);
                 }
-                PoseRandomization.PoseReset();
                 _collisionHelpers.Clear();
                 Destroy(CurrentCharacter);
-                CurrentCharacter = null;
             }
         }
 
@@ -196,9 +196,12 @@ namespace Landmark
                 }
                 Utils.ApplyBarycentricCoordinates(character);
                 _currentScope.Pose = animations[i].name;
-                var data = Utils.CaculateLandmarkModuel(_currentScope.InfoSaveDirctory, _currentScope, character);
+                var data = Utils.CaculateLandmarkModuel(_currentScope, character);
                 Utils.WriteData(_currentScope.InfoSavePath, data);
                 yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+
+                yield return new WaitForEndOfFrame();
+                ScreenCapture.CaptureScreenshot(_currentScope.InfoSaveDirctory + "/" + data.ImagePath);
             }
 
         }
