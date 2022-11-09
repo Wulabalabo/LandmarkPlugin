@@ -77,7 +77,6 @@ namespace Landmark
             _currentScope.InfoSaveDirctory = logicScriptable.OutputDirctory + "/" + _currentScope.InfoSaveTime;
             _currentScope.InfoSavePath = logicScriptable.OutputDirctory + "/" + _currentScope.InfoSaveTime + ".csv";
 
-
             Utils.CreateDirctory(_currentScope.InfoSaveDirctory);
             Utils.WriteTitle(_currentScope.InfoSavePath);
 
@@ -87,12 +86,12 @@ namespace Landmark
 
 
         public void SceneLogic(string SceneName)
-        {            
+        {
             var process = SceneManager.LoadSceneAsync(SceneName);
             process.completed += (a) =>
             {
                 _currentScope.SceneId = SceneManager.GetActiveScene().buildIndex;
-                OnSceneChangeCompleted?.Invoke(_currentScope.SceneId);                
+                OnSceneChangeCompleted?.Invoke(_currentScope.SceneId);
             };
             IsSceneChangeDone = false;
         }
@@ -107,20 +106,22 @@ namespace Landmark
             }
             Debug.Log("Done");
             uiManager.Display(true);
-            yield break;
+            yield return new WaitForEndOfFrame();
         }
 
         IEnumerator PositionChangeLogic(GameObject gameObject)
         {
+            /*
             var objs = gameObject.GetComponentsInChildren<Transform>().Where((item) =>
             {
                 return item.name != gameObject.name;
             }).ToList();
-            
+            */
+            var objs = GameObject.FindGameObjectsWithTag("SpawnPoint");
             foreach (var obj in objs)
             {
                 _currentScope.SpawnpointName = obj.name;
-                yield return StartCoroutine(CharactorLogic(obj));
+                yield return StartCoroutine(CharactorLogic(obj.transform));
             }
             yield break;
         }
@@ -129,9 +130,9 @@ namespace Landmark
         {
             for (int i = 0; i < Characters.Count; i++)
             {
-                CurrentCharacter = Instantiate(Characters[0], pos.position, Quaternion.identity);
+                CurrentCharacter = Instantiate(Characters[i], pos);
                 CurrentCharacter.name = CurrentCharacter.name.Replace("(Clone)", "");
-                Utils.DisplayLandmark(CurrentCharacter);
+                Utils.DisplayLandmark(CurrentCharacter, false);
                 _currentScope.CharacterName = CurrentCharacter.name;
                 foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
                 {
@@ -147,37 +148,46 @@ namespace Landmark
                     }
                 }
 
-
-
+                PoseRandomization.Init(CurrentCharacter);
+                yield return new WaitForSeconds(1f);
 
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
                 {
                     _currentScope.Facing = logicScriptable.Facings[j].ToString();
                     CurrentCharacter.transform.localRotation = Quaternion.Euler(Vector3.up * logicScriptable.Facings[j]);
+
                     Utils.AutoCameraPositioning(CurrentCharacter, pos);
                     yield return StartCoroutine(PosesLogic(CurrentCharacter));
                 }
+
                 //random animation
-                PoseRandomization.Init(CurrentCharacter);
                 _currentScope.Facing = "";
                 for (int k = 0; k < logicScriptable.EachRandomPosesTimes; k++)
                 {
+                    CurrentCharacter.transform.rotation = Quaternion.identity;
+                    PoseRandomization.PoseReset();
                     PoseRandomization.ChangePose();
+                    yield return null;
+
                     foreach (var collisionHelper in _collisionHelpers)
                     {
                         collisionHelper.UpdateCollisionMesh();
                     }
+                    yield return new WaitForFixedUpdate();
                     Utils.ApplyBarycentricCoordinates(CurrentCharacter);
-                    _currentScope.Pose = "RandmoPose" + k.ToString();
-
-                    var data = Utils.CaculateLandmarkModuel(_currentScope.InfoSaveDirctory, _currentScope, CurrentCharacter);
-                    Utils.WriteData(_currentScope.InfoSavePath, data);
                     yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+
+                    _currentScope.Pose = "RandmoPose" + k.ToString();
+                    var data = Utils.CaculateLandmarkModuel(_currentScope, CurrentCharacter);
+                    yield return null;
+                    yield return new WaitForEndOfFrame();
+                    ScreenCapture.CaptureScreenshot(_currentScope.InfoSaveDirctory + "/" + data.ImagePath);
+                    Utils.WriteData(_currentScope.InfoSavePath, data);
                 }
-                PoseRandomization.PoseReset();
+
                 _collisionHelpers.Clear();
                 Destroy(CurrentCharacter);
-                CurrentCharacter = null;
+
             }
         }
 
@@ -186,19 +196,26 @@ namespace Landmark
 
             var animations = character.GetComponent<CharacterModule>().AnimationClips;
             animations = animations.GetRange(0, logicScriptable.EachFixedPosesTimes);
-            //fixed animation
+
             for (int i = 0; i < animations.Count; i++)
             {
                 animations[i].SampleAnimation(character, 0);
+                yield return null;
+
                 foreach (var collisionHelper in _collisionHelpers)
                 {
                     collisionHelper.UpdateCollisionMesh();
                 }
+                yield return new WaitForFixedUpdate();
                 Utils.ApplyBarycentricCoordinates(character);
-                _currentScope.Pose = animations[i].name;
-                var data = Utils.CaculateLandmarkModuel(_currentScope.InfoSaveDirctory, _currentScope, character);
-                Utils.WriteData(_currentScope.InfoSavePath, data);
                 yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+
+                _currentScope.Pose = animations[i].name;
+                var data = Utils.CaculateLandmarkModuel(_currentScope, character);
+                yield return null;
+                yield return new WaitForEndOfFrame();
+                ScreenCapture.CaptureScreenshot(_currentScope.InfoSaveDirctory + "/" + data.ImagePath);
+                Utils.WriteData(_currentScope.InfoSavePath, data);
             }
 
         }
