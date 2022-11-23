@@ -17,7 +17,7 @@ namespace Landmark
         public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject current)
         {
             var modelBoneData = new SerializableDictionary<string, GameObject>();
-            var norepeat = current.GetComponentsInChildren<Transform>().GroupBy(x => x.name)
+            var norepeat = current.GetComponentsInChildren<Transform>(true).GroupBy(x => x.name)
                 .Distinct()
                 .Select(x => x.FirstOrDefault().gameObject)
                 .ToList();
@@ -172,18 +172,11 @@ namespace Landmark
             return transforms;
         }
 
-        public static void WriteData(string filePath, LandmarkModule moduel)
+        public static void WriteData(string filePath, LandmarkModule module)
         {
             var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
-            string visibilities = "";
-            foreach (var item in moduel.ScreenCoordinate)
-            {
-                visibilities += "\"" + "(" + item.X + "," + item.Y + "," + item.X + "," + (int)item.visibility + ")" + "\"" + ",";
-            }
-            string bbox = "\"" + "(" + moduel.CharacterBindingBox.X + "," + moduel.CharacterBindingBox.Y + " " + moduel.CharacterBindingBox.Width + "," + moduel.CharacterBindingBox.Height + ")" + "\"";
-            var context = moduel.ImagePath + "," + visibilities + bbox;
-            sw.WriteLine(context);
+            sw.WriteLine(module);
             sw.Close();
         }
 
@@ -291,22 +284,25 @@ namespace Landmark
             {
                 Vector3 pixCoord = Camera.main.WorldToScreenPoint(landmarks[id].transform.position);
 
-                var info = new LandmarkInfo();
-                info.X = pixCoord.x;
-                info.Y = pixCoord.y;
-                info.Z = pixCoord.z;
-                info.visibility = Visibility.Unlabelled;
+                Visibility visibility = Visibility.Unlabelled;
 
                 // if pixCoord is inside of the screen
                 if (isInsideOfScreen(pixCoord))
                 {
                     if (hitCount[id] > hitThreshold)
-                        info.visibility = Visibility.Visible;
+                        visibility = Visibility.Visible;
                 }
-                if (info.visibility == Visibility.Visible)
+                if (visibility == Visibility.Visible)
                     landmarks[id].GetComponent<Renderer>().material = greenMat;
                 else
                     landmarks[id].GetComponent<Renderer>().material = redMat;
+
+                var info = new LandmarkInfo(
+                    x: pixCoord.x,
+                    y: pixCoord.y,
+                    z: pixCoord.z,
+                    visibility: visibility
+                );
                 infos.Add(info);
             }
             return infos;
@@ -329,18 +325,19 @@ namespace Landmark
                 max.y = Mathf.Max(max.y, q.y);
             }
 
-            var bbox = new CharacterBoundingBox();
-            bbox.X = min.x;
-            bbox.Y = max.y;
-            bbox.Width = max.x - min.x;
-            bbox.Height = max.y - min.y;
+            var bbox = new CharacterBoundingBox(
+                x: min.x,
+                y: max.y,
+                width: max.x - min.x,
+                height: max.y - min.y
+            );
             return bbox;
         }
 
         static List<GameObject> FindLandmarks(GameObject obj)
         {
             List<GameObject> landmarks = new List<GameObject>();
-            foreach (var item in obj.GetComponentsInChildren<Transform>())
+            foreach (var item in obj.GetComponentsInChildren<Transform>(true))
             {
                 if (item.gameObject.CompareTag("Landmark"))
                 {
@@ -432,7 +429,7 @@ namespace Landmark
 
             // find all GameObjects with tag "CollisionMesh"
             Dictionary<string, MeshFilter> collisionMeshFilters = new Dictionary<string, MeshFilter>();
-            foreach (Transform tf in obj.GetComponentsInChildren<Transform>())
+            foreach (Transform tf in obj.GetComponentsInChildren<Transform>(true))
             {
                 if (tf.CompareTag("CollisionMesh"))
                 {
