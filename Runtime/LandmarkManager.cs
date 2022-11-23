@@ -41,7 +41,7 @@ namespace Landmark
                 VisibilityDictionary.Add(int.Parse(jProperty.Name), jProperty.Value.Select((a) => { return (int)a; }).ToArray());
             }
 
-            foreach (var item in obj.GetComponentsInChildren<Transform>())
+            foreach (var item in obj.GetComponentsInChildren<Transform>(true))
             {                
                 if (item.gameObject.name.Contains("Landmark"))
                 {
@@ -52,6 +52,7 @@ namespace Landmark
                 {
                     item.gameObject.layer = LayerMask.NameToLayer("Character");
                 }
+                Landmarks = Landmarks.OrderBy((item) => int.Parse(item.name.Substring(8))).ToList();
             }
             if (Directory.Exists(GlobalConfig.CharactersModelsPath))
             {
@@ -179,7 +180,7 @@ namespace Landmark
         void UpdateLandmarks(GameObject obj)
         {
             Landmarks.Clear();
-            foreach (Transform landmarkTransform in obj.GetComponentInChildren<Transform>())
+            foreach (Transform landmarkTransform in obj.GetComponentsInChildren<Transform>(true))
             {
                 if (landmarkTransform.CompareTag("Landmark"))
                 {
