@@ -26,7 +26,7 @@ public class LandmarkInfo
     }
     public override string ToString()
     {
-        return $"({X},{Y},{Z},{(int)visibility})";
+        return $"\"({X},{Y},{Z},{(int)visibility})\"";
     }
 }
 
