@@ -11,13 +11,13 @@ using UnityEngine;
 
 namespace Landmark
 {
-    
+
     public static class Utils
     {
         public static SerializableDictionary<string, GameObject> CollectModelBoneData(this GameObject current)
         {
             var modelBoneData = new SerializableDictionary<string, GameObject>();
-            var norepeat = current.GetComponentsInChildren<Transform>().GroupBy(x => x.name)
+            var norepeat = current.GetComponentsInChildren<Transform>(true).GroupBy(x => x.name)
                 .Distinct()
                 .Select(x => x.FirstOrDefault().gameObject)
                 .ToList();
@@ -43,7 +43,7 @@ namespace Landmark
             }
             else
             {
-                if(!Directory.Exists(GlobalConfig.LandmarkConfigPath))
+                if (!Directory.Exists(GlobalConfig.LandmarkConfigPath))
                 {
                     Directory.CreateDirectory(GlobalConfig.LandmarkConfigPath);
                 }
@@ -51,7 +51,7 @@ namespace Landmark
                 var defaultPath = UnityEditor.AssetDatabase.GUIDToAssetPath(UnityEditor.AssetDatabase.FindAssets("DefaultLandmark")[0]);
                 StreamReader sr = new StreamReader(defaultPath);
                 var str = sr.ReadToEnd();
-                using (FileStream stream = new FileStream(path,FileMode.OpenOrCreate))
+                using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate))
                 {
                     var bytes = Encoding.UTF8.GetBytes(str);
                     stream.Write(bytes, 0, bytes.Length);
@@ -65,7 +65,7 @@ namespace Landmark
             throw new FileNotFoundException();
         }
 
-        private static void ModifySpecifyConfigType(string path,string type,JToken obj)
+        private static void ModifySpecifyConfigType(string path, string type, JToken obj)
         {
             StreamReader sr = new StreamReader(path);
             var data = JObject.Parse(sr.ReadToEnd());
@@ -79,7 +79,7 @@ namespace Landmark
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
-            }            
+            }
         }
 
         public static void ModifyConfigFile(string fileName, string type, JToken obj)
@@ -87,21 +87,21 @@ namespace Landmark
             var path = GlobalConfig.LandmarkConfigPath + "/" + fileName + "_landmarks.json";
             if (File.Exists(path))
             {
-                ModifySpecifyConfigType(path, type, obj); 
+                ModifySpecifyConfigType(path, type, obj);
                 return;
             }
             throw new FileNotFoundException();
         }
 
-        public static void SaveTexture2DLocally(Texture2D texture2D, string textName,string path)
+        public static void SaveTexture2DLocally(Texture2D texture2D, string textName, string path)
         {
             byte[] bytes = texture2D.EncodeToPNG();
-            File.WriteAllBytes(path+"/"+textName+".png",bytes);
+            File.WriteAllBytes(path + "/" + textName + ".png", bytes);
         }
 
-        public static void AutoCameraPositioning(GameObject targetObject,Transform spawnPoint,float magicalDistance=5f,float magicalRatio=0.7f)
+        public static void AutoCameraPositioning(GameObject targetObject, Transform spawnPoint, float magicalDistance = 5f, float magicalRatio = 0.7f)
         {
-            
+            Debug.Log(GameManager.instance.SkinnedCollisionHelper);
             Mesh mesh = GameManager.instance.SkinnedCollisionHelper.Mesh;
 
             var landmarks = targetObject.GetComponent<CharacterModule>().Landmarks;
@@ -172,18 +172,11 @@ namespace Landmark
             return transforms;
         }
 
-        public static void WriteData(string filePath, LandmarkModule moduel)
+        public static void WriteData(string filePath, LandmarkModule module)
         {
             var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
-            string visibilities = "";
-            foreach (var item in moduel.ScreenCoordinate)
-            {
-                visibilities += "\""+ "("+item.X+","+item.Y+","+item.X+","+(int)item.visibility+")"+ "\""+",";
-            }
-            string bbox = "\""+"("+moduel.CharacterBindingBox.X+","+moduel.CharacterBindingBox.Y + " " + moduel.CharacterBindingBox.Width + "," + moduel.CharacterBindingBox.Height+")"+ "\"";
-            var context = moduel.ImagePath+","+visibilities+bbox;
-            sw.WriteLine(context);
+            sw.WriteLine(module);
             sw.Close();
         }
 
@@ -201,7 +194,7 @@ namespace Landmark
         }
 
 
-        public static LandmarkModule CaculateLandmarkModuel(ScopeInfo info,GameObject obj)
+        public static LandmarkModule CaculateLandmarkModuel(ScopeInfo info, GameObject obj)
         {
             var specimagePath = $"{info.SceneId}-{info.CharacterName}-{info.SpawnpointName}-{info.Facing}-{info.Pose}.jpg"; ;
             List<LandmarkInfo> landmarks = GetLandmarkInfos(obj);
@@ -209,7 +202,7 @@ namespace Landmark
             return new LandmarkModule(specimagePath, landmarks, characterBoundingBox);
         }
 
-        private static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold=100)
+        private static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold = 50)
         {
             var characterScript = obj.GetComponent<CharacterModule>();
             bool isInsideOfScreen(Vector3 pixCoord)
@@ -233,17 +226,17 @@ namespace Landmark
             {
                 hitCount.Add(0);
             }
-            foreach(var kvp in joint2skins)
+            foreach (var kvp in joint2skins)
             {
                 int jointId = kvp.Key;
                 var skinIds = kvp.Value;
 
-                foreach(var skinId in skinIds)
+                foreach (var skinId in skinIds)
                 {
                     skin2joint.Add(skinId, jointId);
                 }
             }
-            
+
 
             RaycastHit hit;
             int layerMask = LayerMask.GetMask("Raycastable") | LayerMask.GetMask("Character") | LayerMask.GetMask("Landmark");
@@ -281,32 +274,35 @@ namespace Landmark
                 }
             }
 
+            Material redMat = new Material(Shader.Find("HDRP/Lit"));
+            Material greenMat = new Material(Shader.Find("HDRP/Lit"));
+            redMat.color = Color.red;
+            greenMat.color = Color.green;
+
             // set LandmarkInfo for each landmark
             for (int id = 0; id < landmarks.Count; ++id)
             {
                 Vector3 pixCoord = Camera.main.WorldToScreenPoint(landmarks[id].transform.position);
 
-                var info = new LandmarkInfo();
-                info.X = pixCoord.x;
-                info.Y = pixCoord.y;
-                info.Z = pixCoord.z;
-                info.visibility = Visibility.Unlabelled;
+                Visibility visibility = Visibility.Unlabelled;
 
                 // if pixCoord is inside of the screen
                 if (isInsideOfScreen(pixCoord))
                 {
-                    if (joint2skins.ContainsKey(id))
-                    {
-                        if (hitCount[id] > hitThreshold * 2)
-                            info.visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        if (hitCount[id] > hitThreshold)
-                            info.visibility = Visibility.Visible;
-                    }
+                    if (hitCount[id] > hitThreshold)
+                        visibility = Visibility.Visible;
                 }
+                if (visibility == Visibility.Visible)
+                    landmarks[id].GetComponent<Renderer>().material = greenMat;
+                else
+                    landmarks[id].GetComponent<Renderer>().material = redMat;
 
+                var info = new LandmarkInfo(
+                    x: pixCoord.x,
+                    y: pixCoord.y,
+                    z: pixCoord.z,
+                    visibility: visibility
+                );
                 infos.Add(info);
             }
             return infos;
@@ -329,18 +325,19 @@ namespace Landmark
                 max.y = Mathf.Max(max.y, q.y);
             }
 
-            var bbox = new CharacterBoundingBox();
-            bbox.X = min.x;
-            bbox.Y = max.y;
-            bbox.Width = max.x - min.x;
-            bbox.Height = max.y - min.y;
+            var bbox = new CharacterBoundingBox(
+                x: min.x,
+                y: max.y,
+                width: max.x - min.x,
+                height: max.y - min.y
+            );
             return bbox;
         }
 
         static List<GameObject> FindLandmarks(GameObject obj)
         {
             List<GameObject> landmarks = new List<GameObject>();
-            foreach (var item in obj.GetComponentsInChildren<Transform>())
+            foreach (var item in obj.GetComponentsInChildren<Transform>(true))
             {
                 if (item.gameObject.CompareTag("Landmark"))
                 {
@@ -352,7 +349,7 @@ namespace Landmark
             return landmarks;
         }
 
-        static SortedList<int, (string, int, Vector3)> ReadBarycentric(GameObject obj)
+        public static SortedList<int, (string, int, Vector3)> ReadBarycentric(GameObject obj)
         {
             SortedList<int, (string, int, Vector3)> id2bary = new SortedList<int, (string, int, Vector3)>();
             string typeName = "barycentricCoordinates";
@@ -429,10 +426,10 @@ namespace Landmark
         {
             var landmarks = obj.GetComponent<CharacterModule>().Landmarks;
             var bary = ReadBarycentric(obj);
-            
+
             // find all GameObjects with tag "CollisionMesh"
             Dictionary<string, MeshFilter> collisionMeshFilters = new Dictionary<string, MeshFilter>();
-            foreach(Transform tf in obj.GetComponentsInChildren<Transform>())
+            foreach (Transform tf in obj.GetComponentsInChildren<Transform>(true))
             {
                 if (tf.CompareTag("CollisionMesh"))
                 {
@@ -459,12 +456,12 @@ namespace Landmark
             }
         }
 
-        public static void DisplayLandmark(GameObject character)
+        public static void DisplayLandmark(GameObject character, bool visible = true)
         {
             var module = character.GetComponent<CharacterModule>();
             foreach (var item in module.Landmarks)
             {
-                item.GetComponent<MeshRenderer>().enabled = false;
+                item.GetComponent<MeshRenderer>().enabled = visible;
             }
         }
     }
