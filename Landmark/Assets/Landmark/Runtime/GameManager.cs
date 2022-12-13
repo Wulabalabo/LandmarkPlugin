@@ -151,20 +151,19 @@ namespace Landmark
                 PoseRandomization.Init(CurrentCharacter);
                 yield return new WaitForSeconds(1f);
 
-                for (int j = 0; j < logicScriptable.Facings.Length; j++)
+                foreach (int facing in logicScriptable.Facings)
                 {
-                    _currentScope.Facing = logicScriptable.Facings[j].ToString();
-                    CurrentCharacter.transform.localRotation = Quaternion.Euler(Vector3.up * logicScriptable.Facings[j]);
+                    _currentScope.Facing = facing.ToString();
+                    CurrentCharacter.transform.localRotation = Quaternion.Euler(Vector3.up * facing);
 
-                    Utils.AutoCameraPositioning(CurrentCharacter, pos);
-                    yield return StartCoroutine(PosesLogic(CurrentCharacter));
+                    yield return StartCoroutine(PosesLogic(CurrentCharacter, pos));
                 }
 
                 //random animation
                 _currentScope.Facing = "";
                 for (int k = 0; k < logicScriptable.EachRandomPosesTimes; k++)
                 {
-                    CurrentCharacter.transform.rotation = Quaternion.identity;
+                    CurrentCharacter.transform.localRotation = Quaternion.identity;
                     PoseRandomization.PoseReset();
                     PoseRandomization.ChangePose();
                     yield return null;
@@ -174,8 +173,13 @@ namespace Landmark
                         collisionHelper.UpdateCollisionMesh();
                     }
                     yield return new WaitForFixedUpdate();
+                    yield return null;
+
                     Utils.ApplyBarycentricCoordinates(CurrentCharacter);
-                    yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+                    yield return null;
+
+                    Utils.AutoCameraPositioning(CurrentCharacter, pos);
+                    yield return null;
 
                     _currentScope.Pose = "RandmoPose" + k.ToString();
                     var data = Utils.CaculateLandmarkModuel(_currentScope, CurrentCharacter);
@@ -191,7 +195,7 @@ namespace Landmark
             }
         }
 
-        private IEnumerator PosesLogic(GameObject character)
+        private IEnumerator PosesLogic(GameObject character, Transform spawnpoint)
         {
 
             var animations = character.GetComponent<CharacterModule>().AnimationClips;
@@ -207,8 +211,13 @@ namespace Landmark
                     collisionHelper.UpdateCollisionMesh();
                 }
                 yield return new WaitForFixedUpdate();
+                yield return null;
+
                 Utils.ApplyBarycentricCoordinates(character);
-                yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+                yield return null;
+
+                Utils.AutoCameraPositioning(CurrentCharacter, spawnpoint);
+                yield return null;
 
                 _currentScope.Pose = animations[i].name;
                 var data = Utils.CaculateLandmarkModuel(_currentScope, character);
