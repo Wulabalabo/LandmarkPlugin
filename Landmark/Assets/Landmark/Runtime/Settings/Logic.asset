@@ -17,7 +17,7 @@ MonoBehaviour:
     - Key: SampleScene
       Value: {fileID: 5863827335941942189, guid: d5e54c55fed2d5d41a7e7862c1080e8d, type: 3}
     - Key: SampleScene2
-      Value: {fileID: 5863827335941942189, guid: d5e54c55fed2d5d41a7e7862c1080e8d, type: 3}
+      Value: {fileID: 170292444288577459, guid: e845ad8eb7fb68d48b51cddee8f7e1bc, type: 3}
   Facings: 000000005a0000000e010000
   EachFixedPosesTimes: 1
   EachRandomPosesTimes: 1
