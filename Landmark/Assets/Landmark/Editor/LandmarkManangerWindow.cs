@@ -88,7 +88,7 @@ public class LandmarkManangerWindow : EditorWindow
             if (_character != null)
             {
                 Script.InitCharacter(_character);
-                foreach (Transform tf in _character.GetComponentsInChildren<Transform>())
+                foreach (Transform tf in _character.GetComponentsInChildren<Transform>(true))
                 {
                     if (tf.CompareTag("CollisionMesh"))
                     {
