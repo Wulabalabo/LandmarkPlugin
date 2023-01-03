@@ -13,4 +13,6 @@ public class GlobalConfig
     public static string PoseRadomizationConfigPath = DataPath + "/Configs/";
 
     public static string CharactersModelsPath =  DataPath + "/Resources/Prefabs";
+
+    public bool DebugMode = false;
 }

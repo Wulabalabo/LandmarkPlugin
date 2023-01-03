@@ -17,10 +17,13 @@ namespace Landmark
         public static GameManager instance { get { return _instance; } }
 
         public List<GameObject> Characters = new List<GameObject>();
-        public SkinnedCollisionHelper SkinnedCollisionHelper { get; private set; }
+        public SkinnedCollisionHelper SkinnedCollisionHelper { get; set; }
         public UiManager uiManager;
+        public DebugManager DebugManager;
+        public Transform DebugModePos;
         public LocalSceneManager localSceneManager;
         public LogicScriptable logicScriptable;
+        public List<Transform> CurrentSpawnPoints;
 
 
         public GameObject CurrentCharacter;
@@ -55,6 +58,7 @@ namespace Landmark
             }).ToList();
             uiManager.InitOption();
             localSceneManager.Init();
+            DebugManager.Init(Characters);
         }
 
 
@@ -91,6 +95,7 @@ namespace Landmark
             var process = SceneManager.LoadSceneAsync(SceneName);
             process.completed += (a) =>
             {
+                if (_currentScope == null) return;
                 _currentScope.SceneId = SceneManager.GetActiveScene().buildIndex;
                 OnSceneChangeCompleted?.Invoke(_currentScope.SceneId);                
             };
@@ -112,12 +117,13 @@ namespace Landmark
 
         IEnumerator PositionChangeLogic(GameObject gameObject)
         {
-            var objs = gameObject.GetComponentsInChildren<Transform>().Where((item) =>
+            CurrentSpawnPoints = null;
+            CurrentSpawnPoints = gameObject.GetComponentsInChildren<Transform>().Where((item) =>
             {
                 return item.name != gameObject.name;
             }).ToList();
             
-            foreach (var obj in objs)
+            foreach (var obj in CurrentSpawnPoints)
             {
                 _currentScope.SpawnpointName = obj.name;
                 yield return StartCoroutine(CharactorLogic(obj));
@@ -129,7 +135,7 @@ namespace Landmark
         {
             for (int i = 0; i < Characters.Count; i++)
             {
-                CurrentCharacter = Instantiate(Characters[0], pos.position, Quaternion.identity);
+                CurrentCharacter = Instantiate(Characters[i], pos.position, Quaternion.identity);
                 CurrentCharacter.name = CurrentCharacter.name.Replace("(Clone)", "");
                 Utils.DisplayLandmark(CurrentCharacter);
                 _currentScope.CharacterName = CurrentCharacter.name;
