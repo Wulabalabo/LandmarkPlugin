@@ -101,7 +101,6 @@ namespace Landmark
 
         public static void AutoCameraPositioning(GameObject targetObject, Transform spawnPoint, float magicalDistance = 5f, float magicalRatio = 0.7f)
         {
-            Debug.Log(GameManager.instance.SkinnedCollisionHelper);
             Mesh mesh = GameManager.instance.SkinnedCollisionHelper.Mesh;
 
             var landmarks = targetObject.GetComponent<CharacterModule>().Landmarks;
@@ -202,7 +201,7 @@ namespace Landmark
             return new LandmarkModule(specimagePath, landmarks, characterBoundingBox);
         }
 
-        private static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold = 50)
+        public static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold = 50)
         {
             var characterScript = obj.GetComponent<CharacterModule>();
             bool isInsideOfScreen(Vector3 pixCoord)

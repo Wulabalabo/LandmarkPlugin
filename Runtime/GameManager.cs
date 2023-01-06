@@ -56,9 +56,10 @@ namespace Landmark
             {
                 return item as GameObject;
             }).ToList();
-            uiManager.InitOption();
+
             localSceneManager.Init();
             DebugManager.Init(Characters);
+            uiManager.InitOption();
         }
 
 
@@ -84,6 +85,7 @@ namespace Landmark
 
             Utils.CreateDirctory(_currentScope.InfoSaveDirctory);
             Utils.WriteTitle(_currentScope.InfoSavePath);
+            DebugManager.QuitDebugMode();
 
             uiManager.Display(false);
             StartCoroutine(SceneChangeLogic());
