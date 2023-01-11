@@ -204,15 +204,6 @@ namespace Landmark
         public static List<LandmarkInfo> GetLandmarkInfos(GameObject obj, int hitThreshold = 50)
         {
             var characterScript = obj.GetComponent<CharacterModule>();
-            bool isInsideOfScreen(Vector3 pixCoord)
-            {
-                int height = Screen.currentResolution.height;
-                int width = Screen.currentResolution.width;
-
-                if (pixCoord.x >= 0 && pixCoord.x < width && pixCoord.y >= 0 && pixCoord.y <= height)
-                    return true;
-                return false;
-            }
 
             var joint2skins = characterScript.Visibility;
             var landmarks = characterScript.Landmarks;
@@ -243,12 +234,6 @@ namespace Landmark
             // Raycast on every landmark
             for (int id = 0; id < landmarks.Count; ++id)
             {
-                Vector3 pixCoord = Camera.main.WorldToScreenPoint(landmarks[id].transform.position);
-
-                // if pixCoord is out of the screen, skip
-                if (!isInsideOfScreen(pixCoord))
-                    continue;
-
                 var meshFilter = landmarks[id].GetComponent<MeshFilter>();
                 Vector3 start = Camera.main.transform.position;
 
@@ -284,13 +269,8 @@ namespace Landmark
                 Vector3 pixCoord = Camera.main.WorldToScreenPoint(landmarks[id].transform.position);
 
                 Visibility visibility = Visibility.Unlabelled;
-
-                // if pixCoord is inside of the screen
-                if (isInsideOfScreen(pixCoord))
-                {
-                    if (hitCount[id] > hitThreshold)
-                        visibility = Visibility.Visible;
-                }
+                if (hitCount[id] > hitThreshold)
+                    visibility = Visibility.Visible;
                 if (visibility == Visibility.Visible)
                     landmarks[id].GetComponent<Renderer>().material = greenMat;
                 else
@@ -311,17 +291,23 @@ namespace Landmark
         {
             var min = Vector2.positiveInfinity;
             var max = Vector2.negativeInfinity;
-            GameObject body = obj.transform.Find("CC_Game_Body").gameObject;
-            MeshFilter filter = body.GetComponent<MeshFilter>();
-            Mesh mesh = filter.mesh;
-            foreach (Vector3 vertex in mesh.vertices)
+
+            foreach (Transform tf in obj.transform)
             {
-                Vector3 p = body.transform.TransformPoint(vertex);
-                Vector3 q = Camera.main.WorldToScreenPoint(p);
-                min.x = Mathf.Min(min.x, q.x);
-                min.y = Mathf.Min(min.y, q.y);
-                max.x = Mathf.Max(max.x, q.x);
-                max.y = Mathf.Max(max.y, q.y);
+                if (tf.CompareTag("CollisionMesh"))
+                {
+                    MeshFilter filter = tf.GetComponent<MeshFilter>();
+                    Mesh mesh = filter.mesh;
+                    foreach (Vector3 vertex in mesh.vertices)
+                    {
+                        Vector3 p = tf.TransformPoint(vertex);
+                        Vector3 q = Camera.main.WorldToScreenPoint(p);
+                        min.x = Mathf.Min(min.x, q.x);
+                        min.y = Mathf.Min(min.y, q.y);
+                        max.x = Mathf.Max(max.x, q.x);
+                        max.y = Mathf.Max(max.y, q.y);
+                    }
+                }
             }
 
             var bbox = new CharacterBoundingBox(
@@ -466,5 +452,3 @@ namespace Landmark
     }
 
 }
-
-
