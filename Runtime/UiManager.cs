@@ -38,7 +38,7 @@ namespace Landmark
             {
                 CaculateVisibilities(value);
             });
-           
+
             DebugMode.onValueChanged.AddListener((value) =>
             {
                 DebugPanel.SetActive(value);
@@ -104,7 +104,7 @@ namespace Landmark
             }
         Result:
             VisibilityResult.text = result;
-            
+
         }
 
         private void CharacterOptionInitial()
@@ -116,7 +116,12 @@ namespace Landmark
                 listOptions.Add(new Dropdown.OptionData(GameManager.instance.Characters[i].name));
             }
             CharacterOption.AddOptions(listOptions);
-            CharacterOption.onValueChanged.AddListener((index) => GameManager.instance.DebugManager.GenerateCharacter(GameManager.instance.DebugManager.Characters[index].name));
+            CharacterOption.onValueChanged.AddListener((index) =>
+            {
+                GameManager.instance.DebugManager.GenerateCharacter(GameManager.instance.DebugManager.Characters[index].name);
+                AnimationOptionInitial();
+            });
+
         }
 
         private void SceneOptionInitial()
@@ -160,6 +165,7 @@ namespace Landmark
 
         private void AnimationOptionInitial()
         {
+            AnimationOption.ClearOptions();
             var listOptions = new List<Dropdown.OptionData>();
             var animations = GameManager.instance.DebugManager.CurrentCharacter.GetComponent<CharacterModule>().AnimationClips;
             foreach (var item in animations)

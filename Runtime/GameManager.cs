@@ -62,13 +62,6 @@ namespace Landmark
             uiManager.InitOption();
         }
 
-
-        internal void ChangeCharacter(string name)
-        {
-            DestroyImmediate(CurrentCharacter);
-            CurrentCharacter = Instantiate(Characters.Where((item) => item.name == name).First());
-        }
-
         internal void DoLogic()
         {
             Debug.Log("Start");
