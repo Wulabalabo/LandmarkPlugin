@@ -8,7 +8,7 @@ public class GlobalConfig
 
     public static string LandmarkConfigPath =  DataPath + "/Configs/LandmarkConfigs";
 
-    public static string DefaultRadomization = DataPath + "/Configs/DefaultRadomization.json";
+    public static string DefaultRandomization = DataPath + "/Configs/DefaultRandomization.json";
 
     public static string PoseRadomizationConfigPath = DataPath + "/Configs/";
 

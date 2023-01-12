@@ -31,7 +31,7 @@ public class PoseRandomization
         }
         else
         {
-            StreamReader sr = new StreamReader(GlobalConfig.DefaultRadomization);
+            StreamReader sr = new StreamReader(GlobalConfig.DefaultRandomization);
             data = JObject.Parse(sr.ReadToEnd());
             sr.Close();
         }           
