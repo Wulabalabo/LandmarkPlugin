@@ -20,7 +20,7 @@ namespace Landmark
 
         public void InitCharacter(GameObject obj)
         {
-            obj.GetOrAddComponent<CharacterModule>();
+            var objModule = obj.GetOrAddComponent<CharacterModule>();
             VisibilityDictionary.Clear();
             var info = Utils.GetJPropertyByFile(obj.name, "definition");
             var visibility = Utils.GetJPropertyByFile(obj.name, "visibility");
@@ -41,19 +41,20 @@ namespace Landmark
                 VisibilityDictionary.Add(int.Parse(jProperty.Name), jProperty.Value.Select((a) => { return (int)a; }).ToArray());
             }
 
-            foreach (var item in obj.GetComponentsInChildren<Transform>(true))
-            {                
-                if (item.gameObject.name.Contains("Landmark"))
-                {
-                    item.gameObject.tag = "Landmark";
-                    Landmarks.Add(item.gameObject);
-                }
-                else
-                {
-                    item.gameObject.layer = LayerMask.NameToLayer("Character");
-                }
-                Landmarks = Landmarks.OrderBy((item) => int.Parse(item.name.Substring(8))).ToList();
-            }
+            //foreach (var item in obj.GetComponentsInChildren<Transform>(true))
+            //{                
+            //    if (item.gameObject.name.Contains("Landmark"))
+            //    {
+            //        item.gameObject.tag = "Landmark";
+            //        Landmarks.Add(item.gameObject);
+            //    }
+            //    else
+            //    {
+            //        item.gameObject.layer = LayerMask.NameToLayer("Character");
+            //    }
+            //    Landmarks = Landmarks.OrderBy((item) => int.Parse(item.name.Substring(8))).ToList();
+            //}
+
             if (Directory.Exists(GlobalConfig.CharactersModelsPath))
             {
                 SavePrefab(obj);
@@ -65,6 +66,25 @@ namespace Landmark
             }
             
             
+        }
+
+        public void GenerateSkinnedCollisionHelper(GameObject obj)
+        {
+            var objModule = obj.GetOrAddComponent<CharacterModule>();
+            objModule.Helpers.Clear();
+            foreach (Transform tf in obj.GetComponentsInChildren<Transform>(true))
+            {
+                if (tf.CompareTag("CollisionMesh"))
+                {
+                    var helper = tf.gameObject.GetOrAddComponent<SkinnedCollisionHelper>();
+                    helper.Init(tf.gameObject);
+                    if (tf.gameObject.name == "CC_Game_Body")
+                    {
+                        objModule.BodyHelper = helper;
+                    }
+                    objModule.Helpers.Add(helper);
+                }
+            }
         }
 
         public void SavePrefab(GameObject obj)
@@ -192,7 +212,10 @@ namespace Landmark
 
         public void ClearLandmarks(GameObject obj)
         {
-            UnityEditor.PrefabUtility.UnpackPrefabInstance(obj,PrefabUnpackMode.OutermostRoot,InteractionMode.UserAction);
+            if (PrefabUtility.GetPrefabAssetType(obj) != PrefabAssetType.NotAPrefab)
+            {
+                UnityEditor.PrefabUtility.UnpackPrefabInstance(obj, PrefabUnpackMode.Completely, InteractionMode.UserAction);
+            }            
             foreach (var landmark in Landmarks)
             {
                 GameObject.DestroyImmediate(landmark);

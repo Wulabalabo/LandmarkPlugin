@@ -87,16 +87,7 @@ public class LandmarkManangerWindow : EditorWindow
             _boneCount = "0";
             if (_character != null)
             {
-                Script.InitCharacter(_character);
-                foreach (Transform tf in _character.GetComponentsInChildren<Transform>(true))
-                {
-                    if (tf.CompareTag("CollisionMesh"))
-                    {
-                        SkinnedCollisionHelper helper = new SkinnedCollisionHelper();
-                        helper.Init(tf.gameObject);
-                        _collisionHelpers.Add(helper);
-                    }
-                }
+                Script.InitCharacter(_character);               
             }
         }
 
@@ -110,10 +101,16 @@ public class LandmarkManangerWindow : EditorWindow
         _boneCount = EditorGUILayout.TextField("Bone:", _boneCount.ToString());
         EditorGUI.EndDisabledGroup();
 
+        if(GUILayout.Button("Generate SkinnedCollisionHelpers"))
+        {
+            Script.GenerateSkinnedCollisionHelper(_character);
+        }
+
         if (GUILayout.Button("Save Change"))
         {
             Script.SavePrefab(_character);
         }
+
 
         #region Generate Landmarks
         SubTitle("Generate Landmarks");
@@ -138,7 +135,6 @@ public class LandmarkManangerWindow : EditorWindow
         }
 
         #endregion
-
 
         #region Config Setting
         SubTitle("Config Setting");

@@ -101,7 +101,8 @@ namespace Landmark
 
         public static void AutoCameraPositioning(GameObject targetObject, Transform spawnPoint, float magicalDistance = 5f, float magicalRatio = 0.7f)
         {
-            Mesh mesh = GameManager.instance.SkinnedCollisionHelper.Mesh;
+            var module = targetObject.GetComponent<CharacterModule>();
+            Mesh mesh = module.BodyHelper.Mesh;
 
             var landmarks = targetObject.GetComponent<CharacterModule>().Landmarks;
 
@@ -122,7 +123,7 @@ namespace Landmark
             {
                 // find bounding box
                 //Vector3 q = landmark.position;
-                Vector3 q = GameManager.instance.SkinnedCollisionHelper.UpdateGameObject.transform.TransformPoint(vertex);
+                Vector3 q = module.BodyHelper.UpdateGameObject.transform.TransformPoint(vertex);
                 min3.x = Mathf.Min(q.x, min3.x);
                 min3.y = Mathf.Min(q.y, min3.y);
                 min3.z = Mathf.Min(q.z, min3.z);
