@@ -157,6 +157,7 @@ namespace Landmark
                 SpawnOption.onValueChanged.AddListener((index) =>
                 {
                     GameManager.instance.DebugManager.CurrentCharacter.transform.position = GameManager.instance.DebugManager.CurrentSpawnPoints[index].transform.position;
+                    GameManager.instance.DebugManager.CurrentCharacter.transform.rotation = GameManager.instance.DebugManager.CurrentSpawnPoints[index].transform.rotation;
                     Utils.AutoCameraPositioning(GameManager.instance.DebugManager.CurrentCharacter, GameManager.instance.DebugManager.CurrentSpawnPoints[index].transform);
                 });
             }

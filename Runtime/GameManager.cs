@@ -13,11 +13,9 @@ namespace Landmark
         private static GameManager _instance;
         private ScopeInfo _currentScope;
         public bool IsSceneChangeDone = false;
-        private List<SkinnedCollisionHelper> _collisionHelpers = new List<SkinnedCollisionHelper>();
         public static GameManager instance { get { return _instance; } }
 
         public List<GameObject> Characters = new List<GameObject>();
-        public SkinnedCollisionHelper SkinnedCollisionHelper { get; set; }
         public UiManager uiManager;
         public DebugManager DebugManager;
         public Transform DebugModePos;
@@ -130,23 +128,23 @@ namespace Landmark
         {
             for (int i = 0; i < Characters.Count; i++)
             {
-                CurrentCharacter = Instantiate(Characters[i], pos.position, Quaternion.identity);
+                CurrentCharacter = Instantiate(Characters[i], pos.position, pos.rotation);
                 CurrentCharacter.name = CurrentCharacter.name.Replace("(Clone)", "");
                 Utils.DisplayLandmark(CurrentCharacter);
                 _currentScope.CharacterName = CurrentCharacter.name;
-                foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
-                {
-                    if (transform.CompareTag("CollisionMesh"))
-                    {
-                        SkinnedCollisionHelper helper = new SkinnedCollisionHelper();
-                        if (transform.name.Equals("CC_Game_Body"))
-                        {
-                            SkinnedCollisionHelper = helper;
-                        }
-                        helper.Init(transform.gameObject);
-                        _collisionHelpers.Add(helper);
-                    }
-                }
+                //foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
+                //{
+                //    if (transform.CompareTag("CollisionMesh"))
+                //    {
+                //        SkinnedCollisionHelper helper = new SkinnedCollisionHelper();
+                //        if (transform.name.Equals("CC_Game_Body"))
+                //        {
+                //            SkinnedCollisionHelper = helper;
+                //        }
+                //        helper.Init(transform.gameObject);
+                //        _collisionHelpers.Add(helper);
+                //    }
+                //}
 
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
                 {                   
@@ -163,7 +161,7 @@ namespace Landmark
                 {
                     PoseRandomization.PoseReset();
                     PoseRandomization.ChangePose();
-                    foreach (var collisionHelper in _collisionHelpers)
+                    foreach (var collisionHelper in CurrentCharacter.GetComponent<CharacterModule>().Helpers)
                     {
                         collisionHelper.UpdateCollisionMesh();
                     }
@@ -177,7 +175,6 @@ namespace Landmark
                     yield return new WaitForEndOfFrame();
                     ScreenCapture.CaptureScreenshot(_currentScope.InfoSaveDirctory + "/" + data.ImagePath);
                 }
-                _collisionHelpers.Clear();
                 Destroy(CurrentCharacter);
             }
         }
@@ -191,7 +188,7 @@ namespace Landmark
             for (int i = 0; i < animations.Count; i++)
             {
                 animations[i].SampleAnimation(character, 0);
-                foreach (var collisionHelper in _collisionHelpers)
+                foreach (var collisionHelper in CurrentCharacter.GetComponent<CharacterModule>().Helpers)
                 {
                     collisionHelper.UpdateCollisionMesh();
                 }

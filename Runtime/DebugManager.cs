@@ -13,7 +13,6 @@ namespace Landmark {
         public List<GameObject> Characters = new List<GameObject>();
         public string CurrentScene;
         public List<Transform> CurrentSpawnPoints = new List<Transform>();
-        private List<SkinnedCollisionHelper> _collisionHelpers = new List<SkinnedCollisionHelper>();
 
         internal void Init(List<GameObject> characters)
         {
@@ -27,7 +26,7 @@ namespace Landmark {
         public void PlayAnimationClip(AnimationClip clip)
         {
             clip.SampleAnimation(CurrentCharacter, 0);
-            foreach (var collisionHelper in _collisionHelpers)
+            foreach (var collisionHelper in CurrentCharacter.GetComponent<CharacterModule>().Helpers)
             {
                 collisionHelper.UpdateCollisionMesh();
             }
@@ -37,7 +36,7 @@ namespace Landmark {
         {
             PoseRandomization.PoseReset();
             PoseRandomization.ChangePose();
-            foreach (var collisionHelper in _collisionHelpers)
+            foreach (var collisionHelper in CurrentCharacter.GetComponent<CharacterModule>().Helpers)
             {
                 collisionHelper.UpdateCollisionMesh();
             }
@@ -51,8 +50,6 @@ namespace Landmark {
         public void GenerateCharacter(string name)
         {
             DestroyImmediate(CurrentCharacter);
-            
-            _collisionHelpers.Clear();
 
             CurrentCharacter = Instantiate(Characters.Where((item) => item.name == name).First(), parent: GameManager.instance.DebugModePos);
 
@@ -62,13 +59,7 @@ namespace Landmark {
             {
                 if (transform.CompareTag("CollisionMesh"))
                 {
-                    SkinnedCollisionHelper helper = new SkinnedCollisionHelper();
-                    if (transform.name.Equals("CC_Game_Body"))
-                    {
-                        GameManager.instance.SkinnedCollisionHelper = helper;
-                    }
-                    helper.Init(transform.gameObject);
-                    _collisionHelpers.Add(helper);
+                    transform.GetComponent<SkinnedCollisionHelper>().GenerateMesh();
                 }
             }
         }
@@ -87,7 +78,6 @@ namespace Landmark {
 
         public void QuitDebugMode()
         {
-            _collisionHelpers.Clear();
             DestroyImmediate(CurrentCharacter);
         }
     }

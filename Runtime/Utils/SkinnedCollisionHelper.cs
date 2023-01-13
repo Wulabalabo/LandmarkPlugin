@@ -4,24 +4,26 @@
  */
 using UnityEngine;
 using System.Collections;
+using Unity.Collections;
+using System;
+using System.Collections.Generic;
 
 namespace Landmark
 {
-    public class SkinnedCollisionHelper
+    public class SkinnedCollisionHelper:MonoBehaviour
     {
         // Public variables
-        // Instance variables
-        private CWeightList[] _nodeWeights; // array of node weights (one per node)
-        private Vector3[] _newVert; // array for the regular update of the collision mesh
-                                    //private Mesh mesh; // the dynamically-updated collision mesh
-        public Mesh Mesh { get; private set; }
-        private MeshCollider _collide;
-        private MeshFilter _filter;
-        private SkinnedMeshRenderer _rend;
+        // Instance variables        
+        public CWeightList[] _nodeWeights;
+       // array of node weights (one per node)
+        public Vector3[] _newVert; // array for the regular update of the collision mesh
 
-        private GameObject _updateGameObject;
+        public Mesh Mesh;//private Mesh mesh;
+        public MeshCollider _collide;// the dynamically-updated collision mesh
+        public MeshFilter _filter;
+        public SkinnedMeshRenderer _rend;
 
-        public GameObject UpdateGameObject { get { return _updateGameObject; } }
+        public GameObject UpdateGameObject;
         // quick pointer to the mesh collider that we're updating
         // Function:    Start
         // This basically translates the information about the skinned mesh into
@@ -29,7 +31,7 @@ namespace Landmark
 
         public void Dispose()
         {
-            _updateGameObject = null;
+            UpdateGameObject = null;
             _rend= null;
             _collide = null;
             _filter = null;
@@ -37,10 +39,22 @@ namespace Landmark
             _nodeWeights = null;
             _newVert = null;
         }
+
+        public void GenerateMesh()
+        {
+            _rend = gameObject.GetOrAddComponent<SkinnedMeshRenderer>();
+            gameObject.GetComponent<MeshFilter>().mesh=
+            Mesh = new Mesh
+            {
+                vertices = _rend.sharedMesh.vertices,
+                uv = _rend.sharedMesh.uv,
+                triangles = _rend.sharedMesh.triangles
+            };
+        }
         public void Init(GameObject obj)
         {
-            
-            _updateGameObject = obj;
+
+            UpdateGameObject = obj;
             _rend = obj.GetOrAddComponent<SkinnedMeshRenderer>();
             _collide = obj.GetOrAddComponent<MeshCollider>();
             _filter=obj.GetOrAddComponent<MeshFilter>();
@@ -123,7 +137,6 @@ namespace Landmark
             {
                 foreach (CVertexWeight vw in wList.Weights)
                 {
-
                     _newVert[vw.Index] += wList.Transform.localToWorldMatrix.MultiplyPoint3x4(vw.LocalPosition) * vw.Weight;
                 }
             }
@@ -132,7 +145,7 @@ namespace Landmark
             // Now convert each point into local coordinates of this object.
             for (int i = 0; i < _newVert.Length; i++)
             {
-                _newVert[i] = _updateGameObject.transform.InverseTransformPoint(_newVert[i]);
+                _newVert[i] = UpdateGameObject.transform.InverseTransformPoint(_newVert[i]);
             }
 
             // Update the mesh (& collider) with the updated vertices
@@ -142,7 +155,9 @@ namespace Landmark
             _collide.sharedMesh = Mesh;
         }
     }
-    class CVertexWeight
+
+    [Serializable]
+    public class CVertexWeight
     {
         public int Index;
         public Vector3 LocalPosition;
@@ -154,14 +169,14 @@ namespace Landmark
             Weight = w;
         }
     }
-
-    class CWeightList
+    [Serializable]
+    public class CWeightList
     {
         public Transform Transform;
-        public ArrayList Weights;
+        public List<CVertexWeight> Weights;
         public CWeightList()
         {
-            Weights = new ArrayList();
+            Weights = new List<CVertexWeight>();
         }
     }
 
