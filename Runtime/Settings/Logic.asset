@@ -21,5 +21,5 @@ MonoBehaviour:
   Facings: 000000005a0000000e010000
   EachFixedPosesTimes: 1
   EachRandomPosesTimes: 1
-  EachAnimationDuration: 0.5
+  EachAnimationDuration: 1
   OutputDirctory: D:/Work/alanprojects/LandmarkPlugin/Landmark/Assets/Output
