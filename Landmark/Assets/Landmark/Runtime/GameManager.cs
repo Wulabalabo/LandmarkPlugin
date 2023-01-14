@@ -128,7 +128,15 @@ namespace Landmark
         {
             for (int i = 0; i < Characters.Count; i++)
             {
-                CurrentCharacter = Instantiate(Characters[i], pos.position, pos.rotation);
+                CurrentCharacter = Instantiate(Characters[i], pos.position, Quaternion.identity);
+                CurrentCharacter.transform.rotation = pos.rotation;
+                foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
+                {
+                    if (transform.CompareTag("CollisionMesh"))
+                    {
+                        transform.GetComponent<SkinnedCollisionHelper>().GenerateMesh();
+                    }
+                }
                 CurrentCharacter.name = CurrentCharacter.name.Replace("(Clone)", "");
                 Utils.DisplayLandmark(CurrentCharacter);
                 _currentScope.CharacterName = CurrentCharacter.name;
