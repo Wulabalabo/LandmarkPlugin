@@ -94,6 +94,8 @@ namespace Landmark
             }
 
             yield return new WaitForFixedUpdate();
+            yield return null;
+
             var allInfos = Utils.GetLandmarkInfos(GameManager.instance.DebugManager.CurrentCharacter);
             for (int i = 0; i < allInfos.Count; i++)
             {
