@@ -196,20 +196,27 @@ namespace Landmark
             for (int i = 0; i < animations.Count; i++)
             {
                 animations[i].SampleAnimation(character, 0);
+                yield return null;
+
                 foreach (var collisionHelper in CurrentCharacter.GetComponent<CharacterModule>().Helpers)
                 {
                     collisionHelper.UpdateCollisionMesh();
                 }
+                yield return new WaitForFixedUpdate();
+                yield return null;
+
                 Utils.ApplyBarycentricCoordinates(character);
+                yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+                yield return null;
+
                 _currentScope.Pose = animations[i].name;
                 var data = Utils.CaculateLandmarkModuel(_currentScope, character);
-                Utils.WriteData(_currentScope.InfoSavePath, data);
-                yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
-
+                yield return null;
                 yield return new WaitForEndOfFrame();
+
+                Utils.WriteData(_currentScope.InfoSavePath, data);
                 ScreenCapture.CaptureScreenshot(_currentScope.InfoSaveDirctory + "/" + data.ImagePath);
             }
-
         }
     }
 }
