@@ -12,7 +12,6 @@ public class LandmarkManangerWindow : EditorWindow
     public GameObject Point;
     public LandmarkManager Script;
 
-    private List<SkinnedCollisionHelper> _collisionHelpers = new List<SkinnedCollisionHelper>();
     [SerializeField]
     List<BarycentricCoodinatesModule> barycentricCoodinates = new List<BarycentricCoodinatesModule>();
     private SerializedObject _objectSo = null;
@@ -172,7 +171,7 @@ public class LandmarkManangerWindow : EditorWindow
         if (EditorGUI.EndChangeCheck()&& Script.AnimationClips.Count > 0 && _character != null)
         {
             Script.AnimationClips[_currentClipIndex].SampleAnimation(_character, 0);
-            foreach(var helper in _collisionHelpers)
+            foreach(var helper in _character.GetComponent<CharacterModule>().Helpers)
                 helper.UpdateCollisionMesh();
         }
 
@@ -218,14 +217,14 @@ public class LandmarkManangerWindow : EditorWindow
         if (GUILayout.Button("ChangePoseTest"))
         {
             PoseRandomization.ChangePose();
-            foreach (var helper in _collisionHelpers)
+            foreach (var helper in _character.GetComponent<CharacterModule>().Helpers)
                 helper.UpdateCollisionMesh();
         }
 
         if (GUILayout.Button("ResetPose"))
         {
             PoseRandomization.PoseReset();
-            foreach (var helper in _collisionHelpers)
+            foreach (var helper in _character.GetComponent<CharacterModule>().Helpers)
                 helper.UpdateCollisionMesh();
         }
         #endregion

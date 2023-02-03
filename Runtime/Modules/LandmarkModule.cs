@@ -63,6 +63,6 @@ public class LandmarkModule
     }
     public override string ToString()
     {
-        return $"{this.ImagePath},{string.Join(",", ScreenCoordinate)},{CharacterBindingBox}\"";
+        return $"{this.ImagePath},{string.Join(",", ScreenCoordinate)},{CharacterBindingBox}";
     }
 }
