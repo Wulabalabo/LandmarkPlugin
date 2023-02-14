@@ -64,8 +64,8 @@ namespace Landmark
                 Debug.LogError($"{GlobalConfig.CharactersModelsPath} Not Exists!");
                 return;
             }
-            
-            
+
+
         }
 
         public void GenerateSkinnedCollisionHelper(GameObject obj)
@@ -89,13 +89,16 @@ namespace Landmark
 
         public void SavePrefab(GameObject obj)
         {
-            obj.GetOrAddComponent<CharacterModule>().Landmarks = Landmarks;
-            obj.GetOrAddComponent<CharacterModule>().Visibility=VisibilityDictionary;
+            //obj.GetOrAddComponent<CharacterModule>().Landmarks = Landmarks;
+            var module = obj.GetOrAddComponent<CharacterModule>();
+            module.Landmarks.Clear();
+            module.Landmarks.AddRange(Landmarks);
+            module.Visibility = VisibilityDictionary;
             UnityEditor.PrefabUtility.SaveAsPrefabAssetAndConnect(obj, $"{GlobalConfig.CharactersModelsPath}/{obj.name}.prefab", UnityEditor.InteractionMode.UserAction);
         }
 
         public void InitModelBoneData(GameObject obj)
-        {           
+        {
             ModelBoneDataDictionary.Clear();
             ModelBoneDataDictionary = obj.transform.Find("root").gameObject.CollectModelBoneData();
         }
@@ -115,6 +118,9 @@ namespace Landmark
                 }
             }
             Landmarks = Landmarks.OrderBy((item) => int.Parse(item.gameObject.name.Remove(0, 8))).ToList();
+            var module = obj.GetComponent<CharacterModule>();
+            module.Landmarks.Clear();
+            module.Landmarks.AddRange(Landmarks);
         }
 
         public void SaveLandmarksPosition(GameObject obj)
@@ -172,7 +178,7 @@ namespace Landmark
             }
             Utils.CreateDirctory(path);
             var folder = new DirectoryInfo(path).GetFiles("*.anim");
-            if(folder.Length > 0)
+            if (folder.Length > 0)
             {
                 foreach (var item in folder)
                 {
@@ -197,7 +203,7 @@ namespace Landmark
             character.AnimationClips = AnimationClips;
         }
 
-        void UpdateLandmarks(GameObject obj)
+        public void UpdateLandmarks(GameObject obj)
         {
             Landmarks.Clear();
             foreach (Transform landmarkTransform in obj.GetComponentsInChildren<Transform>(true))
@@ -215,7 +221,7 @@ namespace Landmark
             if (PrefabUtility.GetPrefabAssetType(obj) != PrefabAssetType.NotAPrefab)
             {
                 UnityEditor.PrefabUtility.UnpackPrefabInstance(obj, PrefabUnpackMode.Completely, InteractionMode.UserAction);
-            }            
+            }
             foreach (var landmark in Landmarks)
             {
                 GameObject.DestroyImmediate(landmark);
@@ -296,7 +302,7 @@ namespace Landmark
             return isHit;
         }
 
-        public void ConfirmBarycentricChange(GameObject obj,List<BarycentricCoodinatesModule> barycentricCoodinates)
+        public void ConfirmBarycentricChange(GameObject obj, List<BarycentricCoodinatesModule> barycentricCoodinates)
         {
             string fieldname = "barycentricCoordinates";
             string coordname = "coordinate";
