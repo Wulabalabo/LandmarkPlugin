@@ -20,7 +20,8 @@ namespace Landmark {
             CurrentLogic = GameManager.instance.logicScriptable;
             CurrentScene = CurrentLogic.ScenesLogic.ElementAt(0).Key;
             GenerateSpawnPoints(CurrentScene);
-            GenerateCharacter(DefaultCharacterName);            
+            GenerateCharacter(DefaultCharacterName);
+            MoveCharacterToSpawn(0);
         }
 
         public void PlayAnimationClip(AnimationClip clip)
@@ -45,6 +46,13 @@ namespace Landmark {
         public void FacingChange()
         {
             CurrentCharacter.transform.Rotate(0, 90, 0);
+        }
+
+        public void MoveCharacterToSpawn(int index)
+        {
+            CurrentCharacter.transform.position = CurrentSpawnPoints[index].transform.position;
+            CurrentCharacter.transform.rotation = CurrentSpawnPoints[index].transform.rotation;
+            Utils.AutoCameraPositioning(CurrentCharacter, CurrentSpawnPoints[index].transform);
         }
 
         public void GenerateCharacter(string name)

@@ -14,6 +14,7 @@ namespace Landmark
         public Dropdown CharacterOption;
         public Dropdown SceneOption;
         public Dropdown SpawnOption;
+        private int _currentSpawnOptionIndex;
         public Dropdown AnimationOption;
         public GameObject DebugPanel;
         public InputField VisibilityInputField;
@@ -121,6 +122,7 @@ namespace Landmark
             CharacterOption.onValueChanged.AddListener((index) =>
             {
                 GameManager.instance.DebugManager.GenerateCharacter(GameManager.instance.DebugManager.Characters[index].name);
+                GameManager.instance.DebugManager.MoveCharacterToSpawn(_currentSpawnOptionIndex);
                 AnimationOptionInitial();
             });
 
@@ -147,6 +149,7 @@ namespace Landmark
         private void SpawnOptionInitial(string key)
         {
             SpawnOption.ClearOptions();
+            _currentSpawnOptionIndex = 0;
             var listOptions = new List<Dropdown.OptionData>();
             if (GameManager.instance.DebugManager.CurrentLogic.ScenesLogic.ContainsKey(key))
             {
@@ -158,9 +161,8 @@ namespace Landmark
                 SpawnOption.AddOptions(listOptions);
                 SpawnOption.onValueChanged.AddListener((index) =>
                 {
-                    GameManager.instance.DebugManager.CurrentCharacter.transform.position = GameManager.instance.DebugManager.CurrentSpawnPoints[index].transform.position;
-                    GameManager.instance.DebugManager.CurrentCharacter.transform.rotation = GameManager.instance.DebugManager.CurrentSpawnPoints[index].transform.rotation;
-                    Utils.AutoCameraPositioning(GameManager.instance.DebugManager.CurrentCharacter, GameManager.instance.DebugManager.CurrentSpawnPoints[index].transform);
+                    _currentSpawnOptionIndex = index;
+                    GameManager.instance.DebugManager.MoveCharacterToSpawn(index);
                 });
             }
 
