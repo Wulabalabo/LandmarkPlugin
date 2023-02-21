@@ -70,6 +70,7 @@ namespace Landmark {
                     transform.GetComponent<SkinnedCollisionHelper>().GenerateMesh();
                 }
             }
+            Utils.GetLandmarkInfos(CurrentCharacter);
         }
 
         public void GenerateSpawnPoints(string key)
