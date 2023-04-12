@@ -110,6 +110,14 @@ namespace Landmark
 
         }
 
+        private void InitDropdownOptions(Dropdown dropdown, List<Dropdown.OptionData> options)
+        {
+            options.Add(new Dropdown.OptionData("defalut"));
+            dropdown.AddOptions(options);
+            dropdown.value = dropdown.options.Count - 1;
+            dropdown.options.RemoveAt(dropdown.options.Count - 1);
+        }
+
         private void CharacterOptionInitial()
         {
             var listOptions = new List<Dropdown.OptionData>();
@@ -118,7 +126,11 @@ namespace Landmark
             {
                 listOptions.Add(new Dropdown.OptionData(GameManager.instance.Characters[i].name));
             }
-            CharacterOption.AddOptions(listOptions);
+            //listOptions.Add(new Dropdown.OptionData("default"));
+            //CharacterOption.AddOptions(listOptions);
+            //CharacterOption.value = CharacterOption.options.Count - 1;
+            //CharacterOption.options.RemoveAt(CharacterOption.options.Count - 1);
+            InitDropdownOptions(CharacterOption, listOptions);
             CharacterOption.onValueChanged.AddListener((index) =>
             {
                 GameManager.instance.DebugManager.GenerateCharacter(GameManager.instance.DebugManager.Characters[index].name);
@@ -162,7 +174,10 @@ namespace Landmark
                 SpawnOption.onValueChanged.AddListener((index) =>
                 {
                     _currentSpawnOptionIndex = index;
-                    GameManager.instance.DebugManager.MoveCharacterToSpawn(index);
+                    if (GameManager.instance.DebugManager.CurrentCharacter != null)
+                    {
+                        GameManager.instance.DebugManager.MoveCharacterToSpawn(index);
+                    }                   
                 });
             }
 
@@ -172,18 +187,21 @@ namespace Landmark
         {
             AnimationOption.ClearOptions();
             var listOptions = new List<Dropdown.OptionData>();
-            var animations = GameManager.instance.DebugManager.CurrentCharacter.GetComponent<CharacterModule>().AnimationClips;
-            foreach (var item in animations)
+            if (GameManager.instance.DebugManager.CurrentCharacter != null)
             {
-                listOptions.Add(new Dropdown.OptionData(item.name));
-            }
-            AnimationOption.AddOptions(listOptions);
-            AnimationOption.onValueChanged.AddListener((index) =>
+                var animations = GameManager.instance.DebugManager.CurrentCharacter.GetComponent<CharacterModule>().AnimationClips;
+                foreach (var item in animations)
+                {
+                    listOptions.Add(new Dropdown.OptionData(item.name));
+                }
+                AnimationOption.AddOptions(listOptions);
+                AnimationOption.onValueChanged.AddListener((index) =>
                 {
                     GameManager.instance.DebugManager.PlayAnimationClip(animations[index]);
                     CaculateVisibilities(VisibilityInputField.text);
                 }
-            );
+                );
+            }          
         }
 
         public void Display(bool display)
