@@ -21,7 +21,10 @@ namespace Landmark {
             CurrentScene = CurrentLogic.ScenesLogic.ElementAt(0).Key;
             GenerateSpawnPoints(CurrentScene);
             GenerateCharacter(DefaultCharacterName);
-            MoveCharacterToSpawn(0);
+            if (CurrentCharacter != null)
+            {
+                MoveCharacterToSpawn(0);
+            }            
         }
 
         public void PlayAnimationClip(AnimationClip clip)
@@ -57,20 +60,31 @@ namespace Landmark {
 
         public void GenerateCharacter(string name)
         {
-            DestroyImmediate(CurrentCharacter);
-
-            CurrentCharacter = Instantiate(Characters.Where((item) => item.name == name).First(), parent: GameManager.instance.DebugModePos);
-
-            PoseRandomization.Init(CurrentCharacter);
-
-            foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
+            if (CurrentCharacter != null)
             {
-                if (transform.CompareTag("CollisionMesh"))
-                {
-                    transform.GetComponent<SkinnedCollisionHelper>().GenerateMesh();
-                }
+                DestroyImmediate(CurrentCharacter);
             }
-            Utils.GetLandmarkInfos(CurrentCharacter);
+
+            var pickedName = Characters?.Where((item) => item.name == name)?.FirstOrDefault();
+            Debug.Log(pickedName);
+            if(pickedName!=null)
+            {
+                CurrentCharacter = Instantiate(pickedName, parent: GameManager.instance.DebugModePos);
+            }
+
+            if (CurrentCharacter != null)
+            {
+                PoseRandomization.Init(CurrentCharacter);
+
+                foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
+                {
+                    if (transform.CompareTag("CollisionMesh"))
+                    {
+                        transform.GetComponent<SkinnedCollisionHelper>().GenerateMesh();
+                    }
+                }
+                Utils.GetLandmarkInfos(CurrentCharacter);
+            }            
         }
 
         public void GenerateSpawnPoints(string key)
