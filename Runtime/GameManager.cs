@@ -154,15 +154,18 @@ namespace Landmark
                 //    }
                 //}
 
+                var baseAngles = CurrentCharacter.transform.localEulerAngles;
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
-                {                   
+                {
                     _currentScope.Facing = logicScriptable.Facings[j].ToString();
-                    CurrentCharacter.transform.localRotation = Quaternion.Euler(Vector3.up * logicScriptable.Facings[j]);
+                    CurrentCharacter.transform.localEulerAngles = baseAngles;
+                    CurrentCharacter.transform.localEulerAngles += new Vector3(0,logicScriptable.Facings[j],0);
                     Utils.AutoCameraPositioning(CurrentCharacter, pos);
-                    yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
-                    yield return StartCoroutine(PosesLogic(CurrentCharacter));
+                    yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);                   
+                    yield return StartCoroutine(PosesLogic(CurrentCharacter));                    
                 }
                 //random animation
+                CurrentCharacter.transform.localEulerAngles = baseAngles;
                 PoseRandomization.Init(CurrentCharacter);
                 _currentScope.Facing = "";
                 for (int k = 0; k < logicScriptable.EachRandomPosesTimes; k++)
