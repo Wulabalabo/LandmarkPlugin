@@ -66,7 +66,7 @@ namespace Landmark {
             }
 
             var pickedName = Characters?.Where((item) => item.name == name)?.FirstOrDefault();
-            Debug.Log(pickedName);
+            
             if(pickedName!=null)
             {
                 CurrentCharacter = Instantiate(pickedName, parent: GameManager.instance.DebugModePos);

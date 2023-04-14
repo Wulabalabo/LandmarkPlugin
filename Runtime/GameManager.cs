@@ -77,7 +77,6 @@ namespace Landmark
             Utils.CreateDirctory(_currentScope.InfoSaveDirctory);
             Utils.WriteTitle(_currentScope.InfoSavePath);
             DebugManager.QuitDebugMode();
-
             uiManager.Display(false);
             StartCoroutine(SceneChangeLogic());
         }
@@ -138,7 +137,7 @@ namespace Landmark
                     }
                 }
                 CurrentCharacter.name = CurrentCharacter.name.Replace("(Clone)", "");
-                Utils.DisplayLandmark(CurrentCharacter);
+                Utils.DisplayLandmark(CurrentCharacter,GlobalConfig.DisplayLandmark);
                 _currentScope.CharacterName = CurrentCharacter.name;
                 //foreach (Transform transform in CurrentCharacter.GetComponentsInChildren<Transform>())
                 //{
@@ -153,16 +152,15 @@ namespace Landmark
                 //        _collisionHelpers.Add(helper);
                 //    }
                 //}
-
+                Utils.AutoCameraPositioning(CurrentCharacter, pos);
                 var baseAngles = CurrentCharacter.transform.localEulerAngles;
                 for (int j = 0; j < logicScriptable.Facings.Length; j++)
                 {
                     _currentScope.Facing = logicScriptable.Facings[j].ToString();
                     CurrentCharacter.transform.localEulerAngles = baseAngles;
-                    CurrentCharacter.transform.localEulerAngles += new Vector3(0,logicScriptable.Facings[j],0);
-                    Utils.AutoCameraPositioning(CurrentCharacter, pos);
+                    CurrentCharacter.transform.localEulerAngles += new Vector3(0,logicScriptable.Facings[j],0);                    
                     yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);                   
-                    yield return StartCoroutine(PosesLogic(CurrentCharacter));                    
+                    yield return StartCoroutine(PosesLogic(CurrentCharacter,pos));                    
                 }
                 //random animation
                 CurrentCharacter.transform.localEulerAngles = baseAngles;
@@ -190,7 +188,7 @@ namespace Landmark
             }
         }
 
-        private IEnumerator PosesLogic(GameObject character)
+        private IEnumerator PosesLogic(GameObject character,Transform pos)
         {
 
             var animations = character.GetComponent<CharacterModule>().AnimationClips;
@@ -200,7 +198,7 @@ namespace Landmark
             {
                 animations[i].SampleAnimation(character, 0);
                 yield return null;
-
+                Utils.AutoCameraPositioning(CurrentCharacter, pos);
                 foreach (var collisionHelper in CurrentCharacter.GetComponent<CharacterModule>().Helpers)
                 {
                     collisionHelper.UpdateCollisionMesh();

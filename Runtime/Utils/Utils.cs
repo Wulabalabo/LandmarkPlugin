@@ -442,7 +442,7 @@ namespace Landmark
             }
         }
 
-        public static void DisplayLandmark(GameObject character, bool visible = true)
+        public static void DisplayLandmark(GameObject character, bool visible)
         {
             var module = character.GetComponent<CharacterModule>();
             foreach (var item in module.Landmarks)
