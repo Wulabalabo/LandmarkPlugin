@@ -23,6 +23,7 @@ namespace Landmark
         public Button RandomPosBtn;
         public Button FacingBtn;
         public Toggle DebugMode;
+        public Toggle ShowLandMark;
 
         private List<int> caculateList = new List<int>();
         public void InitOption()
@@ -34,6 +35,14 @@ namespace Landmark
 
             DebugMode.isOn = false;
             DebugPanel.SetActive(false);
+
+            ShowLandMark.isOn = false;
+            GlobalConfig.DisplayLandmark = ShowLandMark.isOn;
+
+            ShowLandMark.onValueChanged.AddListener((value) =>
+            {
+                GlobalConfig.DisplayLandmark = value;
+            });
 
             VisibilityInputField.onValueChanged.AddListener((value) =>
             {
@@ -207,6 +216,7 @@ namespace Landmark
         public void Display(bool display)
         {
             DebugMode.gameObject.SetActive(display);
+            ShowLandMark.gameObject.SetActive(display);
             DebugPanel.SetActive(display);
             StartBtn.gameObject.SetActive(display);
         }

@@ -14,5 +14,5 @@ public class GlobalConfig
 
     public static string CharactersModelsPath =  DataPath + "/Resources/Prefabs";
 
-    public bool DebugMode = false;
+    public static bool DisplayLandmark = false;
 }
