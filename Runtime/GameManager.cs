@@ -198,7 +198,7 @@ namespace Landmark
             {
                 animations[i].SampleAnimation(character, 0);
                 yield return null;
-                Utils.AutoCameraPositioning(CurrentCharacter, pos);
+               
                 foreach (var collisionHelper in CurrentCharacter.GetComponent<CharacterModule>().Helpers)
                 {
                     collisionHelper.UpdateCollisionMesh();
@@ -208,6 +208,9 @@ namespace Landmark
 
                 Utils.ApplyBarycentricCoordinates(character);
                 yield return new WaitForSeconds(logicScriptable.EachAnimationDuration);
+                yield return null;
+
+                Utils.AutoCameraPositioning(CurrentCharacter, pos);
                 yield return null;
 
                 _currentScope.Pose = animations[i].name;
